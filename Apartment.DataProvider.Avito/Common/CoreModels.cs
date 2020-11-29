@@ -7,8 +7,8 @@ namespace Apartment.DataProvider.Avito.Common
         public string Id { get; set; }
         public PointLatLng Location { get; set; }
         internal int ItemsCount { get; set; }
-        internal int PriceValue { get; set; }
-        internal string PriceText { get; set; }
+        public int PriceValue { get; set; }
+        public string PriceText { get; set; }
 
         public override string ToString() => $"{Id}. [{ItemsCount}]: {PriceText}";
     }

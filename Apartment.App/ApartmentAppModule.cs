@@ -1,10 +1,18 @@
 ﻿using System.IO;
+using System.Linq;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Shapes;
+using Apartment.App.Components;
 using Apartment.App.ViewModels;
 using Apartment.App.Views;
 using Apartment.DataProvider.Avito.Avito;
 using Apartment.DataProvider.Avito.Common;
 using Apartment.Options;
 using Autofac;
+using GMap.NET;
+using GMap.NET.MapProviders;
+using GMap.NET.WindowsPresentation;
 using Newtonsoft.Json;
 
 namespace Apartment.App
@@ -15,6 +23,7 @@ namespace Apartment.App
         {
             builder.RegisterType<MainWindow>().AsSelf();
             builder.RegisterType<MainWindowViewModel>().AsSelf();
+            builder.RegisterType<MapViewModel>().AsSelf();
 
             builder.RegisterType<AvitoApartmentsProvider>().As<IApartmentsProvider>();
 

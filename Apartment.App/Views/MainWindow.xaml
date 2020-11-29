@@ -4,9 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        xmlns:gmaps="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
-        xmlns:m="clr-namespace:GMap.NET.WindowsPresentation;assembly=GMap.NET.WindowsPresentation"
-        Title="Test WPF OpenStreetMap" Height="500" Width="500">
+        xmlns:views="clr-namespace:Apartment.App.Views"
+        Title="Test WPF OpenStreetMap" Height="500" Width="700">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -19,20 +18,18 @@
             <RowDefinition Height="40" />
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Column="0" Text="{Binding Test}" VerticalAlignment="Center" HorizontalAlignment="Center" />
-        <Grid Grid.Column="0" Grid.Row="1">
-            <gmaps:GMapControl x:Name="Carte"
-                               Loaded="Carte_Loaded" Margin="5" />
-            <TextBlock Margin="10" Name="DiplayName"
-                       TextWrapping="Wrap"
-                       HorizontalAlignment="Center" />
-        </Grid>
-        <TextBox Grid.Column="0" Grid.Row="2" x:Name="PositionTextBox" IsReadOnly="true" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <TextBlock Grid.Column="0" Text="Карта" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <views:MapView Grid.Column="0" Grid.Row="1" DataContext="{Binding MapViewModel}" />
+        <TextBox Grid.Column="0" Grid.Row="2" Text="{Binding Path=MapViewModel.CurrentPositionText, Mode=OneWay}" IsReadOnly="true" VerticalAlignment="Center" HorizontalAlignment="Center" />
 
         <GridSplitter Grid.Row="0" Grid.RowSpan="3" Grid.Column="1" Width="2" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
 
         <TextBlock Grid.Row="0" Grid.Column="2" Text="Список квартир" VerticalAlignment="Center" HorizontalAlignment="Center" />
-        <ListBox Grid.Column="2" Grid.Row="1" x:Name="ApartmentsListBox" SelectionChanged="ApartmentsListBox_SelectionChanged" />
-        <Button Grid.Column="2" Grid.Row="2" Content="Обновить список квартир" Click="Button_Click" />
+        <ListView Grid.Column="2" Grid.Row="1"
+                  ItemsSource="{Binding Apartments}"
+                  SelectedItem="{Binding SelectedApartment, Mode=TwoWay}" />
+        <Button Grid.Column="2" Grid.Row="2"
+                Content="Обновить список квартир"
+                Command="{Binding UpdateApartmentsListCommand}" />
     </Grid>
 </Window>

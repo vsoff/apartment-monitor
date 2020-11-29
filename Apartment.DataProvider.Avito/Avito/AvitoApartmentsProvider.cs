@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Apartment.DataProvider.Avito.Common;
 using Apartment.Options;
 using Flurl.Http;
 using GMap.NET;
+using Newtonsoft.Json;
 
 namespace Apartment.DataProvider.Avito.Avito
 {
@@ -24,7 +26,25 @@ namespace Apartment.DataProvider.Avito.Avito
             if (!Uri.IsWellFormedUriString(_options.AvitoUrl, UriKind.Absolute))
                 return null;
 
+#if DEBUG
+            // Пока что кешируем данные, чтобы каждый раз не дёргать авито.
+            const string debugCacheFile = "AvitoCacheFile.json.cache";
+            string jsonContent;
+            if (File.Exists(debugCacheFile))
+            {
+                jsonContent = File.ReadAllText(debugCacheFile);
+            }
+            else
+            {
+                jsonContent = _options.AvitoUrl.GetStringAsync().GetAwaiter().GetResult();
+                File.WriteAllText(debugCacheFile, jsonContent);
+            }
+
+            MapApartmentsResponseWebModel content = JsonConvert.DeserializeObject<MapApartmentsResponseWebModel>(jsonContent);
+#else
             var content = _options.AvitoUrl.GetJsonAsync<MapApartmentsResponseWebModel>().GetAwaiter().GetResult();
+#endif
+
             var apartments = content.rash.Select(x => new ApartmentData
             {
                 Id = x.id,

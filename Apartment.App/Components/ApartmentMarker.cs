@@ -3,10 +3,14 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace Apartment.App.Views
+namespace Apartment.App.Components
 {
     public sealed class ApartmentMarker : Border
     {
+        private readonly Brush _borderBrush = new SolidColorBrush(Colors.CornflowerBlue) {Opacity = 0.6};
+        private readonly Brush _backgroundBrush = new SolidColorBrush(Colors.White) {Opacity = 0.3};
+        private const double MarkSize = 12;
+
         public ApartmentMarker(string text)
         {
             Child = new StackPanel
@@ -15,8 +19,8 @@ namespace Apartment.App.Views
                 {
                     new Ellipse
                     {
-                        Width = 12,
-                        Height = 12,
+                        Width = MarkSize,
+                        Height = MarkSize,
                         Stroke = Brushes.CornflowerBlue,
                         StrokeThickness = 3,
                         StrokeDashOffset = -6
@@ -26,10 +30,13 @@ namespace Apartment.App.Views
             };
 
             BorderThickness = new Thickness(1);
-            var backBrush = new SolidColorBrush(Colors.White) {Opacity = 0.3};
-            Background = backBrush;
-            BorderBrush = Brushes.Blue;
-            MouseUp += (sender, args) => { MessageBox.Show(text); };
+            Background = _backgroundBrush;
+            BorderBrush = _borderBrush;
+        }
+
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            Margin = new Thickness(-sizeInfo.NewSize.Width / 2, -MarkSize / 2, 0, 0);
         }
     }
 }
