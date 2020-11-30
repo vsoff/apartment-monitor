@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
 using System.Windows.Controls;
-using System.Windows.Media;
 using Apartment.App.ViewModels;
 
 namespace Apartment.App.Views

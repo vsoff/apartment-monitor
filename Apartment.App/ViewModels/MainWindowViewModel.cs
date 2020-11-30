@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using Apartment.DataProvider.Avito.Common;
-using GMap.NET;
 
 namespace Apartment.App.ViewModels
 {
@@ -17,6 +16,7 @@ namespace Apartment.App.ViewModels
             _apartmentsProvider = apartmentsProvider ?? throw new ArgumentNullException(nameof(apartmentsProvider));
             Apartments = new ObservableCollection<ApartmentData>();
             UpdateApartmentsListCommand = new RelayCommand(_ => UpdateApartmentsList(), x => true);
+            DeleteSelectedRegionCommand = new RelayCommand(_ => DeleteSelectedRegion(), x => SelectedRegion != null);
         }
 
         /// <summary>
@@ -29,9 +29,25 @@ namespace Apartment.App.ViewModels
             MapViewModel.SetDrawableApartments(actualApartments);
         }
 
+        private void DeleteSelectedRegion()
+        {
+            if (SelectedRegion == null)
+                return;
+
+            Regions.Remove(SelectedRegion);
+        }
+
         #region Binding
 
+        public bool IsRegionEditingMode
+        {
+            get => MapViewModel.IsRegionEditingMode;
+            set => MapViewModel.IsRegionEditingMode = value;
+        }
+
         public MapViewModel MapViewModel { get; }
+
+        #region Apartments
 
         private ObservableCollection<ApartmentData> _apartments;
 
@@ -68,10 +84,57 @@ namespace Apartment.App.ViewModels
             }
         }
 
+        #endregion
+
+        #region Regions
+
+        private ObservableCollection<ApartmentsRegion> _regions;
+
+        /// <summary>
+        /// Список квартир.
+        /// </summary>
+        public ObservableCollection<ApartmentsRegion> Regions
+        {
+            get => _regions;
+            set
+            {
+                _regions = value;
+                OnPropertyChanged(nameof(_regions));
+            }
+        }
+
+        private ApartmentsRegion _selectedRegion;
+
+        /// <summary>
+        /// Выбранная квартира.
+        /// </summary>
+        public ApartmentsRegion SelectedRegion
+        {
+            get => _selectedRegion;
+            set
+            {
+                _selectedRegion = value;
+
+                // Центрируем карту по выбранной квартире.
+                if (_selectedRegion != null)
+                    // TODO: Добавить отчку центра для регионов.
+                    MapViewModel.SetCurrentPosition(_selectedRegion.Locations.First());
+
+                OnPropertyChanged(nameof(SelectedApartment));
+            }
+        }
+
+        #endregion
+
         /// <summary>
         /// Команда обновления актуального списка квартир.
         /// </summary>
         public ICommand UpdateApartmentsListCommand { get; }
+
+        /// <summary>
+        /// Команда удаления выделенного региона.
+        /// </summary>
+        public ICommand DeleteSelectedRegionCommand { get; }
 
         #endregion
     }

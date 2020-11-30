@@ -2,6 +2,7 @@
 using System.Net;
 using Apartment.App.Views;
 using Autofac;
+using GMap.NET;
 
 namespace Apartment.App
 {
@@ -12,6 +13,9 @@ namespace Apartment.App
         {
             // Добавляем поддержку протокола "TLS1.2".
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+
+            // Настраиваем GMap.
+            GMaps.Instance.Mode = AccessMode.ServerAndCache;
 
             // Формируем контейнер и билдим его.
             var builder = new ContainerBuilder();

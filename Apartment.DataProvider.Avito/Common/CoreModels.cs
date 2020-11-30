@@ -1,4 +1,6 @@
-﻿using GMap.NET;
+﻿using System.Collections.Generic;
+using System.Linq;
+using GMap.NET;
 
 namespace Apartment.DataProvider.Avito.Common
 {
@@ -11,5 +13,17 @@ namespace Apartment.DataProvider.Avito.Common
         public string PriceText { get; set; }
 
         public override string ToString() => $"{Id}. [{ItemsCount}]: {PriceText}";
+    }
+
+    public class ApartmentsRegion
+    {
+        public string Name { get; }
+        public IReadOnlyCollection<PointLatLng> Locations { get; }
+
+        public ApartmentsRegion(string name, IEnumerable<PointLatLng> locations)
+        {
+            Name = name;
+            Locations = locations.ToArray();
+        }
     }
 }

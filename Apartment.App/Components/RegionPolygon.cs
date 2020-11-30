@@ -40,14 +40,6 @@ namespace Apartment.App.Components
                 IsHitTestVisible = false
             };
 
-            //if (addBlurEffect)
-            //    path.Effect = new BlurEffect()
-            //    {
-            //        KernelType = KernelType.Gaussian,
-            //        Radius = 3.0,
-            //        RenderingBias = RenderingBias.Performance
-            //    };
-
             return path;
         }
     }
