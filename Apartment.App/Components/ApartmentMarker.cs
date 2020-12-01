@@ -3,7 +3,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Apartment.DataProvider.Avito.Common;
+using Apartment.DataProvider;
+using Apartment.DataProvider.Models;
 using GMap.NET.WindowsPresentation;
 
 namespace Apartment.App.Components

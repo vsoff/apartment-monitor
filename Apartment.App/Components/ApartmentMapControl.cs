@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Apartment.DataProvider.Avito.Common;
+using Apartment.App.Models;
+using Apartment.DataProvider;
+using Apartment.DataProvider.Models;
 using GMap.NET;
 using GMap.NET.MapProviders;
 using GMap.NET.WindowsPresentation;
@@ -146,7 +149,7 @@ namespace Apartment.App.Components
         /// <summary>
         /// Добавляет объект на карту.
         /// </summary>
-        public void AddObject(IEnumerable<object> objects, MapLayer layer)
+        public void AddObject(IEnumerable objects, MapLayer layer)
         {
             foreach (var obj in objects)
                 AddObject(obj, layer);
@@ -157,6 +160,12 @@ namespace Apartment.App.Components
         /// </summary>
         public void AddObject(object obj, MapLayer layer)
         {
+            if (obj is IEnumerable enumerable)
+            {
+                AddObject(enumerable, layer);
+                return;
+            }
+
             if (_markerByObjectMap.TryGetValue(obj, out _))
                 throw new ArgumentException("Этот объект уже добавлен на карту");
 
@@ -171,7 +180,7 @@ namespace Apartment.App.Components
         /// <summary>
         /// Удаляет объект с карты.
         /// </summary>
-        public void RemoveObjectIfExists(IEnumerable<object> objects)
+        public void RemoveObjectIfExists(IEnumerable objects)
         {
             foreach (var obj in objects)
                 RemoveObjectIfExists(obj);
@@ -182,6 +191,12 @@ namespace Apartment.App.Components
         /// </summary>
         public void RemoveObjectIfExists(object obj)
         {
+            if (obj is IEnumerable enumerable)
+            {
+                RemoveObjectIfExists(enumerable);
+                return;
+            }
+
             if (!_markerByObjectMap.TryGetValue(obj, out var marker))
                 return;
 

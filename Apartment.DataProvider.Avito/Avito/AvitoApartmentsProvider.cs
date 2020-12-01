@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Apartment.DataProvider.Avito.Common;
+using Apartment.DataProvider.Models;
 using Apartment.Options;
 using Flurl.Http;
 using GMap.NET;

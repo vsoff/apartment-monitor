@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Apartment.DataProvider\Apartment.DataProvider.csproj" />
     <ProjectReference Include="..\Apartment.Options\Apartment.Options.csproj" />
   </ItemGroup>
 

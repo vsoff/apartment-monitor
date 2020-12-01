@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Windows;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
+using Apartment.App.Common;
 using Apartment.App.Components;
-using Apartment.DataProvider.Avito.Common;
+using Apartment.App.Models;
+using Apartment.DataProvider;
+using Apartment.DataProvider.Models;
 using Apartment.Options;
 using GMap.NET;
-using GMap.NET.WindowsPresentation;
 
 namespace Apartment.App.ViewModels
 {
@@ -18,10 +18,8 @@ namespace Apartment.App.ViewModels
     {
         public bool IsRegionEditingMode { get; set; }
 
-        /// <summary>
-        /// Вызывается, когда был создан новый регион.
-        /// </summary>
-        public event EventHandler<ApartmentsRegion> NewRegionCreated;
+        public ObservableCollection<ApartmentData> Apartments { get; }
+        public ObservableCollection<ApartmentsRegion> Regions { get; }
 
         /// <summary>
         /// Объект карты.
@@ -37,20 +35,43 @@ namespace Apartment.App.ViewModels
             Map.MouseRightButtonClick += Map_MouseRightButtonClick;
             IsRegionEditingMode = false;
 
-            _apartments = new List<ApartmentData>();
-            _regions = new List<ApartmentsRegion>();
             _newRegionData = null;
             _newRegionPointsData = new List<NewRegionPoint>();
+
+            var apartments = new FixedObservableCollection<ApartmentData>();
+            apartments.CollectionChanged += DrawableCollectionChanged;
+            apartments.Clearing += Apartments_Clearing;
+            Apartments = apartments;
+
+            var regions = new FixedObservableCollection<ApartmentsRegion>();
+            regions.CollectionChanged += DrawableCollectionChanged;
+            regions.Clearing += Apartments_Clearing;
+            Regions = regions;
         }
 
-        public void SetDrawableRegions(IEnumerable<ApartmentsRegion> regions)
-        {
-            if (regions == null) throw new ArgumentNullException(nameof(regions));
+        private void Apartments_Clearing(object sender, EventArgs e) => Map.RemoveObjectIfExists(sender);
 
-            Map.RemoveObjectIfExists(_regions);
-            _regions.Clear();
-            _regions.AddRange(regions);
-            Map.AddObject(_regions, MapLayer.Apartments);
+        private void DrawableCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems?.Count > 0)
+            {
+                var items = e.NewItems;
+                // TODO: Избавиться от слоёв.
+                Map.AddObject(items, MapLayer.Apartments);
+                return;
+            }
+
+            if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems?.Count > 0)
+            {
+                var items = e.OldItems;
+                Map.RemoveObjectIfExists(items);
+                return;
+            }
+
+            if (e.Action == NotifyCollectionChangedAction.Reset)
+                return;
+
+            throw new NotImplementedException("Такой кейс не проверялся");
         }
 
         #region Mouse events
@@ -76,12 +97,11 @@ namespace Apartment.App.ViewModels
         #region New region editing
 
         private readonly List<NewRegionPoint> _newRegionPointsData;
-        private readonly List<ApartmentsRegion> _regions;
         private NewRegionData _newRegionData;
 
         private void FlushNewRegion()
         {
-            var newRegion = new ApartmentsRegion($"test {DateTime.Now}", _newRegionData.Locations);
+            var locations = _newRegionData.Locations;
 
             // Чистим карту
             Map.RemoveObjectIfExists(_newRegionData);
@@ -89,8 +109,9 @@ namespace Apartment.App.ViewModels
             _newRegionData = null;
             _newRegionPointsData.Clear();
 
-            Map.AddObject(newRegion, MapLayer.Regions);
-            _regions.Add(newRegion);
+            // Добавляем новоиспечённый регион.
+            if (locations.Count > 3)
+                Regions.Add(new ApartmentsRegion($"Новый регион {DateTime.Now}", locations));
         }
 
         private void AddNewRegionPoint(PointLatLng point)
@@ -114,22 +135,6 @@ namespace Apartment.App.ViewModels
 
             _newRegionData = new NewRegionData(locations);
             Map.AddObject(_newRegionData, MapLayer.NewRegion);
-        }
-
-        #endregion
-
-        #region Apartments
-
-        private readonly List<ApartmentData> _apartments;
-
-        public void SetDrawableApartments(IEnumerable<ApartmentData> apartments)
-        {
-            if (apartments == null) throw new ArgumentNullException(nameof(apartments));
-
-            Map.RemoveObjectIfExists(_apartments);
-            _apartments.Clear();
-            _apartments.AddRange(apartments);
-            Map.AddObject(_apartments, MapLayer.Apartments);
         }
 
         #endregion

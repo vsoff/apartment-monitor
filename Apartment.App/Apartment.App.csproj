@@ -14,7 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Apartment.Core\Apartment.Core.csproj" />
     <ProjectReference Include="..\Apartment.DataProvider.Avito\Apartment.DataProvider.Avito.csproj" />
+    <ProjectReference Include="..\Apartment.DataProvider\Apartment.DataProvider.csproj" />
     <ProjectReference Include="..\Apartment.Options\Apartment.Options.csproj" />
   </ItemGroup>
 

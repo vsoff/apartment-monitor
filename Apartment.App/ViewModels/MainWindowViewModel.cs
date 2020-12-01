@@ -1,9 +1,9 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
 using Apartment.App.Common;
-using Apartment.DataProvider.Avito.Common;
+using Apartment.DataProvider;
+using Apartment.DataProvider.Models;
 
 namespace Apartment.App.ViewModels
 {
@@ -15,7 +15,6 @@ namespace Apartment.App.ViewModels
         {
             MapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
             _apartmentsProvider = apartmentsProvider ?? throw new ArgumentNullException(nameof(apartmentsProvider));
-            Apartments = new ObservableCollection<ApartmentData>();
             UpdateApartmentsListCommand = new RelayCommand(_ => UpdateApartmentsList(), x => true);
             DeleteSelectedRegionCommand = new RelayCommand(_ => DeleteSelectedRegion(), x => SelectedRegion != null);
         }
@@ -26,44 +25,27 @@ namespace Apartment.App.ViewModels
         private void UpdateApartmentsList()
         {
             var actualApartments = _apartmentsProvider.GetApartments().DistinctBy(x => x.Id).OrderBy(x => x.PriceValue).ToArray();
-            Apartments = new ObservableCollection<ApartmentData>(actualApartments);
-            MapViewModel.SetDrawableApartments(actualApartments);
+            MapViewModel.Apartments.Clear();
+            foreach (var apartment in actualApartments)
+                MapViewModel.Apartments.Add(apartment);
         }
 
+        /// <summary>
+        /// Удаляет выбранный регион.
+        /// </summary>
         private void DeleteSelectedRegion()
         {
             if (SelectedRegion == null)
                 return;
 
-            Regions.Remove(SelectedRegion);
+            MapViewModel.Regions.Remove(SelectedRegion);
         }
 
         #region Binding
 
-        public bool IsRegionEditingMode
-        {
-            get => MapViewModel.IsRegionEditingMode;
-            set => MapViewModel.IsRegionEditingMode = value;
-        }
-
         public MapViewModel MapViewModel { get; }
 
         #region Apartments
-
-        private ObservableCollection<ApartmentData> _apartments;
-
-        /// <summary>
-        /// Список квартир.
-        /// </summary>
-        public ObservableCollection<ApartmentData> Apartments
-        {
-            get => _apartments;
-            set
-            {
-                _apartments = value;
-                OnPropertyChanged(nameof(Apartments));
-            }
-        }
 
         private ApartmentData _selectedApartment;
 
@@ -89,21 +71,6 @@ namespace Apartment.App.ViewModels
 
         #region Regions
 
-        private ObservableCollection<ApartmentsRegion> _regions;
-
-        /// <summary>
-        /// Список квартир.
-        /// </summary>
-        public ObservableCollection<ApartmentsRegion> Regions
-        {
-            get => _regions;
-            set
-            {
-                _regions = value;
-                OnPropertyChanged(nameof(_regions));
-            }
-        }
-
         private ApartmentsRegion _selectedRegion;
 
         /// <summary>
@@ -118,8 +85,7 @@ namespace Apartment.App.ViewModels
 
                 // Центрируем карту по выбранной квартире.
                 if (_selectedRegion != null)
-                    // TODO: Добавить отчку центра для регионов.
-                    MapViewModel.SetCurrentPosition(_selectedRegion.Locations.First());
+                    MapViewModel.SetCurrentPosition(_selectedRegion.Center);
 
                 OnPropertyChanged(nameof(SelectedApartment));
             }

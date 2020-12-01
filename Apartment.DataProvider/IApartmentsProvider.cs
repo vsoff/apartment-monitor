@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Apartment.DataProvider.Models;
 
-namespace Apartment.DataProvider.Avito.Common
+namespace Apartment.DataProvider
 {
     public interface IApartmentsProvider
     {
