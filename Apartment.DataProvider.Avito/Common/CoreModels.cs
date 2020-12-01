@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using GMap.NET;
 
@@ -15,15 +16,37 @@ namespace Apartment.DataProvider.Avito.Common
         public override string ToString() => $"{Id}. [{ItemsCount}]: {PriceText}";
     }
 
+    public class NewRegionPoint
+    {
+        public PointLatLng Location { get; }
+
+        public NewRegionPoint(PointLatLng location)
+        {
+            Location = location;
+        }
+    }
+
+    public class NewRegionData
+    {
+        public IReadOnlyCollection<PointLatLng> Locations { get; }
+
+        public NewRegionData(IEnumerable<PointLatLng> locations)
+        {
+            Locations = new List<PointLatLng>(locations);
+        }
+    }
+
     public class ApartmentsRegion
     {
-        public string Name { get; }
+        public string Name { get; set; }
         public IReadOnlyCollection<PointLatLng> Locations { get; }
 
         public ApartmentsRegion(string name, IEnumerable<PointLatLng> locations)
         {
             Name = name;
-            Locations = locations.ToArray();
+            Locations = new List<PointLatLng>(locations);
         }
+
+        public override string ToString() => $"[{Locations.Count}] {Name}";
     }
 }

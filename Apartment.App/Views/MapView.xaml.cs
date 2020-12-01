@@ -15,6 +15,7 @@ namespace Apartment.App.Views
             DataContextChanged += MapView_DataContextChanged;
         }
 
+        // TODO: Всю логику из компонента ApartmentMapControl перенести сюда, убрать нарушение MVVM из MapViewModel и вызывать тут методы ViewModel.
         private void MapView_DataContextChanged(object sender, System.Windows.DependencyPropertyChangedEventArgs e)
         {
             // Прокинем карту на вьюху, чтобы слой view использовал карту из слоя viewModel.

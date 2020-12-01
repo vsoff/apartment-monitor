@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using Apartment.App.Common;
 using Apartment.DataProvider.Avito.Common;
 
 namespace Apartment.App.ViewModels

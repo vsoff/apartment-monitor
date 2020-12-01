@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -22,14 +21,9 @@ namespace Apartment.App.Components
 
         public ApartmentMapControl(PointLatLng startPosition)
         {
-            _markers = new MultiValueDictionary<MapLayer, GMapMarker>()
-            {
-                [MapLayer.NewRegion] = new List<GMapMarker>(),
-                [MapLayer.Apartments] = new List<GMapMarker>(),
-                [MapLayer.Regions] = new List<GMapMarker>()
-            };
+            _markerByObjectMap = new Dictionary<object, GMapMarker>();
 
-            #region Map
+            #region Map settings
 
             MapProvider = OpenStreetMapProvider.Instance;
             MinZoom = 2;
@@ -41,8 +35,12 @@ namespace Apartment.App.Components
             DragButton = MouseButton.Left;
 
             LastPosition = startPosition;
-            OnPositionChanged += point => { LastPosition = point; };
 
+            #endregion
+
+            #region Events
+
+            OnPositionChanged += point => { LastPosition = point; };
             Point? leftPoint = null;
             MouseLeftButtonUp += (sender, args) =>
             {
@@ -74,25 +72,6 @@ namespace Apartment.App.Components
             #endregion
         }
 
-        public ApartmentsRegion FlushRegion(string regionName)
-        {
-            var newRegionMarkers = _markers[MapLayer.NewRegion];
-            var newRegionPoints = newRegionMarkers
-                .Where(x => x.GetType() != typeof(RegionPolygon))
-                .Select(x => x.Position).ToArray();
-            if (newRegionPoints.Length < 3)
-            {
-                ClearLayer(MapLayer.NewRegion);
-                return null;
-            }
-
-            var region = new ApartmentsRegion(regionName, newRegionPoints);
-            AddRegionMarkers(new[] {region});
-            ClearLayer(MapLayer.NewRegion);
-
-            return region;
-        }
-
         private int GetZIndex(MapLayer layer)
         {
             switch (layer)
@@ -100,106 +79,123 @@ namespace Apartment.App.Components
                 case MapLayer.Apartments: return 10;
                 case MapLayer.Regions: return 1;
                 case MapLayer.NewRegion: return 2;
+                case MapLayer.NewRegionPoints: return 3;
                 default: return 0;
             }
         }
 
-        private void AddMarker(MapLayer layer, GMapMarker marker)
+        private readonly Dictionary<object, GMapMarker> _markerByObjectMap;
+
+        [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
+        private GMapMarker CreateMarker(object obj)
         {
-            marker.ZIndex = GetZIndex(layer);
-            _markers[layer].Add(marker);
+            Type type = obj.GetType();
+
+            if (type == typeof(NewRegionData))
+            {
+                var data = obj as NewRegionData;
+
+                return new RegionPolygon(data.Locations, new Polygon
+                {
+                    Stroke = Brushes.DarkRed,
+                    Fill = Brushes.IndianRed,
+                    Opacity = 0.6,
+                    StrokeThickness = 2,
+                });
+            }
+
+            if (type == typeof(NewRegionPoint))
+            {
+                var data = obj as NewRegionPoint;
+                const double size = 8;
+                return new GMapMarker(data.Location)
+                {
+                    Shape = new Rectangle
+                    {
+                        Stroke = Brushes.Red,
+                        Fill = Brushes.White,
+                        Width = size,
+                        Height = size,
+                        StrokeThickness = 1
+                    },
+                    Offset = new Point(-size / 2, -size / 2)
+                };
+            }
+
+            if (type == typeof(ApartmentData))
+            {
+                var data = obj as ApartmentData;
+                return new ApartmentMarker(data, x => MessageBox.Show(x.ToString(), x.Id));
+            }
+
+            if (type == typeof(ApartmentsRegion))
+            {
+                var data = obj as ApartmentsRegion;
+                return new RegionPolygon(data.Locations, new Polygon
+                {
+                    Stroke = Brushes.CornflowerBlue,
+                    Fill = Brushes.LightSkyBlue,
+                    Opacity = 0.6,
+                    StrokeThickness = 2
+                });
+            }
+
+            throw new ArgumentException($"Неизвестный тип {type.FullName}", nameof(obj));
+        }
+
+        /// <summary>
+        /// Добавляет объект на карту.
+        /// </summary>
+        public void AddObject(IEnumerable<object> objects, MapLayer layer)
+        {
+            foreach (var obj in objects)
+                AddObject(obj, layer);
+        }
+
+        /// <summary>
+        /// Добавляет объект на карту.
+        /// </summary>
+        public void AddObject(object obj, MapLayer layer)
+        {
+            if (_markerByObjectMap.TryGetValue(obj, out _))
+                throw new ArgumentException("Этот объект уже добавлен на карту");
+
+            var marker = CreateMarker(obj);
+            var zIndex = GetZIndex(layer);
+            marker.ZIndex = zIndex;
+
+            _markerByObjectMap.Add(obj, marker);
             Markers.Add(marker);
         }
 
-        private void AddMarker(MapLayer layer, ICollection<GMapMarker> markers)
+        /// <summary>
+        /// Удаляет объект с карты.
+        /// </summary>
+        public void RemoveObjectIfExists(IEnumerable<object> objects)
         {
-            var zIndex = GetZIndex(layer);
-            _markers[layer].AddRange(markers);
-            foreach (var marker in markers)
-            {
-                marker.ZIndex = zIndex;
-                Markers.Add(marker);
-            }
+            foreach (var obj in objects)
+                RemoveObjectIfExists(obj);
         }
 
-        public void AddRegionMarkers(IEnumerable<ApartmentsRegion> regions)
+        /// <summary>
+        /// Удаляет объект с карты.
+        /// </summary>
+        public void RemoveObjectIfExists(object obj)
         {
-            var markers = regions.Select(x => new RegionPolygon(x.Locations, new Polygon
-            {
-                Stroke = Brushes.CornflowerBlue,
-                Fill = Brushes.LightSkyBlue,
-                Opacity = 0.6,
-                StrokeThickness = 2
-            }));
-            AddMarker(MapLayer.Regions, markers.ToArray());
+            if (!_markerByObjectMap.TryGetValue(obj, out var marker))
+                return;
+
+            _markerByObjectMap.Remove(marker);
+            Markers.Remove(marker);
         }
-
-        public void AddApartmentMarkers(IEnumerable<ApartmentData> apartments)
-        {
-            var markers = apartments.Select(x => new ApartmentMarker(x, data => MessageBox.Show(data.ToString(), data.Id)));
-            AddMarker(MapLayer.Apartments, markers.ToArray());
-        }
-
-        public void AddNewRegionMarker(PointLatLng point)
-        {
-            const string regionTag = "regionTag";
-            var temp = _markers[MapLayer.NewRegion].Where(x => x.GetType() != typeof(RegionPolygon)).ToList();
-            ClearLayer(MapLayer.NewRegion);
-
-            temp.Add(new GMapMarker(point)
-            {
-                Shape = new Rectangle
-                {
-                    Width = 12,
-                    Height = 12,
-                    Stroke = Brushes.Red,
-                    StrokeThickness = 2
-                },
-                Offset = new Point(-6, -6)
-            });
-
-            temp.Add(new RegionPolygon(temp.Select(x => x.Position).ToArray(), new Polygon
-            {
-                Stroke = Brushes.DarkRed,
-                Fill = Brushes.IndianRed,
-                Opacity = 0.6,
-                StrokeThickness = 2,
-                Tag = regionTag
-            }));
-
-            AddMarker(MapLayer.NewRegion, temp);
-        }
-
-        public void ClearLayer(MapLayer layer)
-        {
-            foreach (var marker in _markers[layer])
-                Markers.Remove(marker);
-
-            _markers[layer].Clear();
-        }
-
-        private readonly MultiValueDictionary<MapLayer, GMapMarker> _markers;
     }
 
     public enum MapLayer
     {
         Undefined,
         NewRegion,
+        NewRegionPoints,
         Regions,
         Apartments
-    }
-
-    public class MultiValueDictionary<TKey, TValue> : Dictionary<TKey, List<TValue>>
-    {
-        public void Add(TKey key, TValue value)
-        {
-            if (!TryGetValue(key, out var values))
-            {
-                values = new List<TValue>();
-                Add(key, values);
-            }
-
-            values.Add(value);
-        }
     }
 }

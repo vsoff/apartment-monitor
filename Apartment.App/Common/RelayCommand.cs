@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Apartment.App
+namespace Apartment.App.Common
 {
     public class RelayCommand : ICommand
     {

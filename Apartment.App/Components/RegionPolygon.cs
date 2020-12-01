@@ -16,7 +16,7 @@ namespace Apartment.App.Components
         {
             _polygonInfo = polygonInfo ?? throw new ArgumentNullException(nameof(polygonInfo));
         }
-
+        
         public override Path CreatePath(List<Point> localPath, bool addBlurEffect)
         {
             StreamGeometry streamGeometry = new StreamGeometry();
