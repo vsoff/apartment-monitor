@@ -26,7 +26,8 @@ namespace Apartment.App.ViewModels
         {
             var actualApartments = _apartmentsProvider.GetApartments().DistinctBy(x => x.Id).OrderBy(x => x.PriceValue).ToArray();
             MapViewModel.Apartments.Clear();
-            foreach (var apartment in actualApartments)
+            foreach (var apartment in actualApartments
+                .Where(x => MapViewModel.Regions.Count == 0 || MapViewModel.Regions.Any(r => r.Contains(x.Location))))
                 MapViewModel.Apartments.Add(apartment);
         }
 

@@ -98,13 +98,7 @@ namespace Apartment.App.Components
             {
                 var data = obj as NewRegionData;
 
-                return new RegionPolygon(data.Locations, new Polygon
-                {
-                    Stroke = Brushes.DarkRed,
-                    Fill = Brushes.IndianRed,
-                    Opacity = 0.6,
-                    StrokeThickness = 2,
-                });
+                return new RegionPolygon(data.Locations, null, Colors.IndianRed);
             }
 
             if (type == typeof(NewRegionPoint))
@@ -134,13 +128,7 @@ namespace Apartment.App.Components
             if (type == typeof(ApartmentsRegion))
             {
                 var data = obj as ApartmentsRegion;
-                return new RegionPolygon(data.Locations, new Polygon
-                {
-                    Stroke = Brushes.CornflowerBlue,
-                    Fill = Brushes.LightSkyBlue,
-                    Opacity = 0.6,
-                    StrokeThickness = 2
-                });
+                return new RegionPolygon(data.Locations, data.Name, Colors.LightSkyBlue);
             }
 
             throw new ArgumentException($"Неизвестный тип {type.FullName}", nameof(obj));

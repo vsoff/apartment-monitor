@@ -6,7 +6,7 @@ namespace Apartment.DataProvider.Helpers
 {
     internal static class CoreModelsHelper
     {
-        public static PointsCollectionInfo GetMiddle(ICollection<PointLatLng> points)
+        public static RectLatLng GetPointsRect(ICollection<PointLatLng> points)
         {
             if (points == null) throw new ArgumentNullException(nameof(points));
             if (points.Count == 0) throw new ArgumentOutOfRangeException(nameof(points));
@@ -23,9 +23,7 @@ namespace Apartment.DataProvider.Helpers
                 lngMax = Math.Max(lngMax, point.Lng);
             }
 
-            var rect = new RectLatLng(latMin, lngMin, latMax - latMin, lngMax - lngMin);
-            var center = new PointLatLng((latMax + latMin) / 2, (lngMax + lngMin) / 2);
-            return new PointsCollectionInfo(rect, center);
+            return new RectLatLng(latMax, lngMin, lngMax - lngMin, latMax - latMin);
         }
     }
 }

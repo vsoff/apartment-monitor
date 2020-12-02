@@ -101,6 +101,9 @@ namespace Apartment.App.ViewModels
 
         private void FlushNewRegion()
         {
+            if (_newRegionData == null)
+                return;
+
             var locations = _newRegionData.Locations;
 
             // Чистим карту
@@ -110,7 +113,7 @@ namespace Apartment.App.ViewModels
             _newRegionPointsData.Clear();
 
             // Добавляем новоиспечённый регион.
-            if (locations.Count > 3)
+            if (locations.Count > 2)
                 Regions.Add(new ApartmentsRegion($"Новый регион {DateTime.Now}", locations));
         }
 
