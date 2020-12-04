@@ -4,7 +4,7 @@ using GMap.NET;
 
 namespace Apartment.DataProvider.Helpers
 {
-    internal static class CoreModelsHelper
+    public static class CoreModelsHelper
     {
         public static RectLatLng GetPointsRect(ICollection<PointLatLng> points)
         {

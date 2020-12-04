@@ -1,18 +1,10 @@
 ﻿using System.IO;
-using System.Linq;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
-using Apartment.App.Components;
 using Apartment.App.ViewModels;
 using Apartment.App.Views;
 using Apartment.DataProvider;
-using Apartment.DataProvider.Avito.Avito;
+using Apartment.DataProvider.Avito;
 using Apartment.Options;
 using Autofac;
-using GMap.NET;
-using GMap.NET.MapProviders;
-using GMap.NET.WindowsPresentation;
 using Newtonsoft.Json;
 
 namespace Apartment.App

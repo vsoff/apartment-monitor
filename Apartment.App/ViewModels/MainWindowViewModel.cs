@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using Apartment.App.Common;
+using Apartment.App.Models;
 using Apartment.DataProvider;
 using Apartment.DataProvider.Models;
+using GMap.NET;
 
 namespace Apartment.App.ViewModels
 {
@@ -19,17 +22,50 @@ namespace Apartment.App.ViewModels
             DeleteSelectedRegionCommand = new RelayCommand(_ => DeleteSelectedRegion(), x => SelectedRegion != null);
         }
 
+        private static readonly SizeLatLng MergeApartmentsClip = new SizeLatLng(0.0002, 0.0004);
+
         /// <summary>
         /// Обновляет актуальный список квартир.
         /// </summary>
         private void UpdateApartmentsList()
         {
-            var actualApartments = _apartmentsProvider.GetApartments().DistinctBy(x => x.Id).OrderBy(x => x.PriceValue).ToArray();
+            var actualApartments = _apartmentsProvider.GetApartments().DistinctBy(x => x.Id).OrderBy(x => x.Price).ToArray();
             MapViewModel.Apartments.Clear();
-            foreach (var apartment in actualApartments
-                .Where(x => MapViewModel.Regions.Count == 0 || MapViewModel.Regions.Any(r => r.Contains(x.Location))))
-                MapViewModel.Apartments.Add(apartment);
+            var apartmentInRegions = MapViewModel.Regions.Count == 0
+                ? actualApartments
+                : actualApartments.Where(x => MapViewModel.Regions.Any(r => r.Contains(x.Location)));
+
+            var groupedApartments = GroupNearestApartments(apartmentInRegions, MergeApartmentsClip);
+            foreach (var apartmentGroup in groupedApartments)
+                MapViewModel.Apartments.Add(apartmentGroup);
         }
+
+        /// <summary>
+        /// Группирует квартиры, которые находятся поблизости.
+        /// </summary>
+        private IEnumerable<ApartmentsGroup> GroupNearestApartments(IEnumerable<ApartmentData> apartments, SizeLatLng size)
+        {
+            double GetDiscreteValue(double value, double step) => (float) Math.Round(value / step) * step;
+
+            //double GetDiscreteValue2(double value, double step) => (int)(value / step) * step;
+            PointLatLng GetDiscrete(PointLatLng p) => new PointLatLng(GetDiscreteValue(p.Lat, size.HeightLat), GetDiscreteValue(p.Lng, size.WidthLng));
+
+            var map = new Dictionary<PointLatLng, List<ApartmentData>>();
+            foreach (var apartment in apartments)
+            {
+                var discretePoint = GetDiscrete(apartment.Location);
+                if (!map.TryGetValue(discretePoint, out var list))
+                {
+                    list = new List<ApartmentData>();
+                    map[discretePoint] = list;
+                }
+
+                list.Add(apartment);
+            }
+
+            return map.Select(x => new ApartmentsGroup(x.Value));
+        }
+
 
         /// <summary>
         /// Удаляет выбранный регион.
@@ -48,23 +84,23 @@ namespace Apartment.App.ViewModels
 
         #region Apartments
 
-        private ApartmentData _selectedApartment;
+        private ApartmentsGroup _selectedApartmentGroup;
 
         /// <summary>
         /// Выбранная квартира.
         /// </summary>
-        public ApartmentData SelectedApartment
+        public ApartmentsGroup SelectedApartmentGroup
         {
-            get => _selectedApartment;
+            get => _selectedApartmentGroup;
             set
             {
-                _selectedApartment = value;
+                _selectedApartmentGroup = value;
 
-                // Центрируем карту по выбранной квартире.
-                if (_selectedApartment != null)
-                    MapViewModel.SetCurrentPosition(_selectedApartment.Location);
+                // Центрируем карту по выбранной группе квартир.
+                if (_selectedApartmentGroup != null)
+                    MapViewModel.SetCurrentPosition(_selectedApartmentGroup.Location);
 
-                OnPropertyChanged(nameof(SelectedApartment));
+                OnPropertyChanged(nameof(SelectedApartmentGroup));
             }
         }
 
@@ -88,7 +124,7 @@ namespace Apartment.App.ViewModels
                 if (_selectedRegion != null)
                     MapViewModel.SetCurrentPosition(_selectedRegion.Center);
 
-                OnPropertyChanged(nameof(SelectedApartment));
+                OnPropertyChanged(nameof(SelectedApartmentGroup));
             }
         }
 

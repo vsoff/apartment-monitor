@@ -3,25 +3,36 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using Apartment.DataProvider;
-using Apartment.DataProvider.Models;
+using Apartment.App.Models;
 using GMap.NET.WindowsPresentation;
 
 namespace Apartment.App.Components
 {
     public sealed class ApartmentMarker : GMapMarker
     {
-        public ApartmentMarker(ApartmentData apartmentData, Action<ApartmentData> clickHandler) : base(apartmentData.Location)
+        public ApartmentMarker(ApartmentsGroup apartmentGroup, Action<ApartmentsGroup> clickHandler) : base(apartmentGroup.Location)
         {
-            var component = new ApartmentMarkerShape(apartmentData.PriceText);
-            component.MouseUp += (sender, args) => clickHandler(apartmentData);
+            const double defaultOpacity = 0.7;
+            var component = new ApartmentMarkerShape(apartmentGroup.Title) {Opacity = defaultOpacity};
+            component.MouseUp += (sender, args) => clickHandler(apartmentGroup);
+            var initZIndex = ZIndex;
+            component.MouseEnter += (sender, args) =>
+            {
+                component.Opacity = 1;
+                ZIndex = initZIndex + 1;
+            };
+            component.MouseLeave += (sender, args) =>
+            {
+                component.Opacity = defaultOpacity;
+                ZIndex = initZIndex;
+            };
             Shape = component;
         }
 
         private sealed class ApartmentMarkerShape : Border
         {
-            private readonly Brush _borderBrush = new SolidColorBrush(Colors.CornflowerBlue) {Opacity = 0.6};
-            private readonly Brush _backgroundBrush = new SolidColorBrush(Colors.White) {Opacity = 0.3};
+            private readonly Brush _borderBrush = new SolidColorBrush(Colors.CornflowerBlue) {Opacity = 1};
+            private readonly Brush _backgroundBrush = new SolidColorBrush(Colors.White) {Opacity = 0.8};
             private const double MarkSize = 12;
 
             public ApartmentMarkerShape(string text)

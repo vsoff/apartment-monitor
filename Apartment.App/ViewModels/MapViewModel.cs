@@ -18,7 +18,7 @@ namespace Apartment.App.ViewModels
     {
         public bool IsRegionEditingMode { get; set; }
 
-        public ObservableCollection<ApartmentData> Apartments { get; }
+        public ObservableCollection<ApartmentsGroup> Apartments { get; }
         public ObservableCollection<ApartmentsRegion> Regions { get; }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Apartment.App.ViewModels
             _newRegionData = null;
             _newRegionPointsData = new List<NewRegionPoint>();
 
-            var apartments = new FixedObservableCollection<ApartmentData>();
+            var apartments = new FixedObservableCollection<ApartmentsGroup>();
             apartments.CollectionChanged += DrawableCollectionChanged;
             apartments.Clearing += Apartments_Clearing;
             Apartments = apartments;

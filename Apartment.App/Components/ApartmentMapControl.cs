@@ -119,10 +119,10 @@ namespace Apartment.App.Components
                 };
             }
 
-            if (type == typeof(ApartmentData))
+            if (type == typeof(ApartmentsGroup))
             {
-                var data = obj as ApartmentData;
-                return new ApartmentMarker(data, x => MessageBox.Show(x.ToString(), x.Id));
+                var data = obj as ApartmentsGroup;
+                return new ApartmentMarker(data, x => MessageBox.Show(x.ToString(), x.Title));
             }
 
             if (type == typeof(ApartmentsRegion))
