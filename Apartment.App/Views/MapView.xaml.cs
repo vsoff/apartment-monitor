@@ -59,7 +59,7 @@ namespace Apartment.App.Views
                 if (Math.Abs(newPoint.X - leftPoint.Value.X) < double.Epsilon && Math.Abs(newPoint.Y - leftPoint.Value.Y) < double.Epsilon)
                 {
                     if (_viewModel.AddNewRegionPointCommand.CanExecute(null))
-                        _viewModel.AddNewRegionPointCommand?.Execute(args);
+                        _viewModel.AddNewRegionPointCommand?.Execute(MapControl.Position);
                 }
             };
             MouseLeftButtonDown += (sender, args) => { leftPoint = args.GetPosition(this); };
@@ -74,7 +74,7 @@ namespace Apartment.App.Views
                 if (Math.Abs(newPoint.X - rightPoint.Value.X) < double.Epsilon && Math.Abs(newPoint.Y - rightPoint.Value.Y) < double.Epsilon)
                 {
                     if (_viewModel.FlushNewRegionPointCommand.CanExecute(null))
-                        _viewModel.FlushNewRegionPointCommand?.Execute(args);
+                        _viewModel.FlushNewRegionPointCommand?.Execute(MapControl.Position);
                 }
             };
             MouseRightButtonDown += (sender, args) => { rightPoint = args.GetPosition(this); };

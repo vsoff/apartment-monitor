@@ -7,6 +7,7 @@ using System.Windows.Input;
 using Apartment.App.Common;
 using Apartment.App.Components;
 using Apartment.App.Models;
+using Apartment.App.Views;
 using Apartment.DataProvider.Models;
 using Apartment.Options;
 using GMap.NET;
@@ -34,8 +35,8 @@ namespace Apartment.App.ViewModels
             if (options == null) throw new ArgumentNullException(nameof(options));
             AddNewRegionPointCommand = new RelayCommand(x => AddNewRegionPoint((PointLatLng) x), x => IsRegionEditingMode);
             FlushNewRegionPointCommand = new RelayCommand(x => FlushNewRegion(), x => IsRegionEditingMode);
-            // TODO: сделать норм вьюху для отображения.
-            OpenMarkerInfoCommand = new RelayCommand(x => MessageBox.Show(x.ToString(), "Header"));
+            // TODO: Убрать нарушение MVVM.
+            OpenMarkerInfoCommand = new RelayCommand(x => new ApartmentsGroupWindow(x as ApartmentsGroup).ShowDialog());
             IsRegionEditingMode = false;
 
             _newRegionData = null;
@@ -67,7 +68,7 @@ namespace Apartment.App.ViewModels
             if (e.Action == NotifyCollectionChangedAction.Remove && e.OldItems?.Count > 0)
             {
                 var items = e.OldItems;
-                ItemsAdded?.Invoke(this, items);
+                ItemsRemoved?.Invoke(this, items);
                 return;
             }
 

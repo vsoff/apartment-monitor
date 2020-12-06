@@ -82,7 +82,7 @@ viewPort[height]: 747
                 Price = x.price,
                 PublishingDate = DateTimeOffset.FromUnixTimeSeconds(x.time).UtcDateTime,
                 Title = x.title,
-                Url = x.url
+                Url = Url.Combine("https://www.avito.ru", x.url)
             }).ToArray();
         }
 

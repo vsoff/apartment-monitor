@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         xmlns:views="clr-namespace:Apartment.App.Views"
-        Title="Apartments Monitor" Height="500" Width="700">
+        WindowStartupLocation="CenterScreen"
+        Title="Apartments Monitor" Height="850" Width="1200">
     <Window.Resources>
         <Style TargetType="CheckBox">
             <Setter Property="Margin" Value="3" />
