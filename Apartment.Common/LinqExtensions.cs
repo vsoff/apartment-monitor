@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Apartment.App.Common
+namespace Apartment.Common
 {
     public static class LinqExtensions
     {

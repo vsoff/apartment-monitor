@@ -25,7 +25,7 @@ namespace Apartment.App.ViewModels
 
     public class ApartmentDataViewModel : ViewModelBase
     {
-        public string Id => _apartment.Id;
+        public string Id => _apartment.ExternalId;
         public int Price => _apartment.Price;
         public string Url => _apartment.Url;
         public DateTime PublishingDate => _apartment.PublishingDate;
@@ -33,9 +33,9 @@ namespace Apartment.App.ViewModels
         public string Address => _apartment.Address;
         public ObservableCollection<string> ImageUrls { get; }
 
-        private readonly ApartmentData _apartment;
+        private readonly ApartmentInfo _apartment;
 
-        public ApartmentDataViewModel(ApartmentData apartment)
+        public ApartmentDataViewModel(ApartmentInfo apartment)
         {
             _apartment = apartment ?? throw new ArgumentNullException(nameof(apartment));
             ImageUrls = new ObservableCollection<string>(_apartment.ImageUrls);

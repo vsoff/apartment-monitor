@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Apartment.DataProvider.Models;
+using Apartment.Options;
 using Flurl;
 using Flurl.Http;
 using GMap.NET;
@@ -12,6 +14,7 @@ namespace Apartment.DataProvider.Avito
 {
     public class AvitoApartmentsProvider : IApartmentsProvider
     {
+        private readonly DebugOptions _options;
         private const string RequestUrl = @"https://www.avito.ru/js/v2/map/items";
 
         private const string MaxPriceTag = "priceMax";
@@ -37,52 +40,87 @@ viewPort[width]: 784
 viewPort[height]: 747
 {LimitTag}: 10";
 
-        public IReadOnlyCollection<ApartmentData> GetApartments()
+        public AvitoApartmentsProvider(DebugOptions options)
+        {
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        public async Task<ICollection<ApartmentInfo>> GetApartmentsAsync()
         {
             const int limit = 50;
             const int maxPrice = 2500000;
             var items = new List<Item>(128);
 
-#if DEBUG
-            // Пока что кешируем данные, чтобы каждый раз не дёргать авито.
-            const string debugCacheFile = "AvitoCacheFile3.json.cache";
-            string jsonContent;
-            if (File.Exists(debugCacheFile))
+            if (_options.UseProviderCache)
             {
-                jsonContent = File.ReadAllText(debugCacheFile);
-                var cacheItems = JsonConvert.DeserializeObject<List<Item>>(jsonContent);
-                items.AddRange(cacheItems);
+                string cacheFile = "AvitoCacheFile.json.cache";
+                string jsonContent;
+                if (File.Exists(cacheFile))
+                {
+                    jsonContent = File.ReadAllText(cacheFile);
+                    var cacheItems = JsonConvert.DeserializeObject<List<Item>>(jsonContent);
+                    items.AddRange(cacheItems);
+                }
+                else
+                {
+                    for (int page = 1;; page++)
+                    {
+                        var url = BuildUrl(page, limit, maxPrice);
+
+                        var response = await url.GetJsonAsync<AvitoApartmentsResponse>();
+                        items.AddRange(response.items);
+
+                        if (page * limit >= response.count)
+                            break;
+                    }
+
+                    jsonContent = JsonConvert.SerializeObject(items);
+                    File.WriteAllText(cacheFile, jsonContent);
+                }
             }
             else
             {
-#endif
                 for (int page = 1;; page++)
                 {
                     var url = BuildUrl(page, limit, maxPrice);
 
-                    var response = url.GetJsonAsync<AvitoApartmentsResponse>().GetAwaiter().GetResult();
+                    var response = await url.GetJsonAsync<AvitoApartmentsResponse>();
                     items.AddRange(response.items);
 
                     if (page * limit >= response.count)
                         break;
                 }
-#if DEBUG
-
-                jsonContent = JsonConvert.SerializeObject(items);
-                File.WriteAllText(debugCacheFile, jsonContent);
             }
-#endif
 
-            return items.Select(x => new ApartmentData
+            return items.Select(x =>
             {
-                Id = x.itemId.ToString(),
-                Location = new PointLatLng(x.coords.lat, x.coords.lng),
-                Address = x.geo.formattedAddress,
-                ImageUrls = x.images.Select(i => i.SmallSize).ToArray(),
-                Price = x.price,
-                PublishingDate = DateTimeOffset.FromUnixTimeSeconds(x.time).UtcDateTime,
-                Title = x.title,
-                Url = Url.Combine("https://www.avito.ru", x.url)
+                var stringArea = x.ext.area?.Length > 3
+                    ? x.ext.area.Replace(".", ",").Substring(0, x.ext.area.Length - 3)
+                    : null;
+                // TODO: Этот кусок кода будет зависеть от локали, надо исправить.
+                double.TryParse(stringArea, out var area);
+                int.TryParse(x.ext.nomer_kvartiry, out var apartNumber);
+                int.TryParse(x.ext.floor, out var floor);
+                int.TryParse(x.ext.floors_count, out var floorsCount);
+                int.TryParse(x.ext.rooms, out var roomsCount);
+
+                return new ApartmentInfo
+                {
+                    ExternalId = x.itemId.ToString(),
+                    Location = new PointLatLng(x.coords.lat, x.coords.lng),
+                    Price = x.price,
+                    Url = Url.Combine("https://www.avito.ru", x.url),
+                    ApartmentNumber = apartNumber,
+                    Floor = floor,
+                    FloorsCount = floorsCount,
+                    RoomsCount = roomsCount,
+                    Area = area,
+                    Title = x.title,
+                    Address = x.geo.formattedAddress,
+                    PublishingDate = DateTimeOffset.FromUnixTimeSeconds(x.time).UtcDateTime,
+                    DisappearedDate = null,
+                    ImageUrls = x.images.Select(i => i.SmallSize).ToArray()
+                };
             }).ToArray();
         }
 

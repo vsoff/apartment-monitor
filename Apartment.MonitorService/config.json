@@ -4,12 +4,8 @@
       "Data Source=localhost;Initial Catalog=ApartmentsTest;Integrated Security=True;MultipleActiveResultSets=True",
     "DataProviderType": "MsSql"
   },
-  "StartPosition": {
-    "Latitude": 61.78473079668365,
-    "Longitude": 34.3461799621582
-  },
   "Debug": {
-    "UseProviderCache": true
+    "UseProviderCache": false
   },
-  "UseOriginalProvider": false
+  "WorkerInterval": "01:00:00"
 }

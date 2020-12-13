@@ -12,22 +12,22 @@ namespace Apartment.App.Models
     {
         public readonly string Title;
         public readonly PointLatLng Location;
-        public readonly IReadOnlyCollection<ApartmentData> Apartments;
+        public readonly IReadOnlyCollection<ApartmentInfo> Apartments;
 
-        public ApartmentsGroup(IEnumerable<ApartmentData> apartments)
+        public ApartmentsGroup(IEnumerable<ApartmentInfo> apartments)
         {
             if (apartments == null) throw new ArgumentNullException(nameof(apartments));
-            var apartmentList = new List<ApartmentData>(apartments);
+            var apartmentList = new List<ApartmentInfo>(apartments);
             if (apartmentList.Count == 0) throw new ArgumentOutOfRangeException(nameof(apartments));
             Title = GetGroupTitle(apartmentList);
             Location = CoreModelsHelper.GetPointsRect(apartmentList.Select(x => x.Location).ToArray()).LocationMiddle;
             Apartments = apartmentList;
         }
 
-        private static string GetGroupTitle(ICollection<ApartmentData> apartments)
+        private static string GetGroupTitle(ICollection<ApartmentInfo> apartments)
         {
             if (apartments.Count == 1)
-                return apartments.First().PriceText;
+                return ToText(apartments.First().Price);
 
             var orderedApartments = apartments.OrderBy(x => x.Price).ToArray();
             var priceMin = orderedApartments.First();
