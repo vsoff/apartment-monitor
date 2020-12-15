@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Apartment.Common;
 using Apartment.Common.Loggers;
@@ -43,16 +44,18 @@ namespace Apartment.MonitorService
             try
             {
                 _logger.Info($"{GetType().Name}: Производится получение данных от провайдера...");
+                var sw = Stopwatch.StartNew();
                 var actualApartments = await _apartmentsProvider.GetApartmentsAsync();
+                _logger.Info($"{GetType().Name}: от провайдера получено {actualApartments.Count} объявлений за {sw.Elapsed}");
 
-                _logger.Info($"{GetType().Name}: от провайдера получено {actualApartments.Count} объявлений");
+                sw.Restart();
                 await _apartmentService.AddOrUpdateAsync(actualApartments);
                 await _apartmentService.UpdateDisappearedStatusAsync();
-                _logger.Info($"{GetType().Name}: Данные успешно получены и записаны");
+                _logger.Info($"{GetType().Name}: Данные успешно получены и записаны за {sw.Elapsed}");
             }
             catch (Exception ex)
             {
-                _logger.Error($"{GetType().Name}: Во время получения данных произошла ошибка", ex);
+                _logger.Error($"{GetType().Name}: Во время получения/записи данных произошла ошибка", ex);
             }
         }
 

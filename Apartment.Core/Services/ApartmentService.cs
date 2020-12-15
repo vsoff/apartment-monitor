@@ -90,10 +90,14 @@ namespace Apartment.Core.Services
             // Сохраняем новые объявления.
             var newItems = newEntitiesMap.Values.Where(x => !existsApartmentsMap.Keys.Contains(x.ExternalId)).ToArray();
             _logger.Trace($"{GetType().Name}: Всего на запись отправлено: {newEntitiesMap.Count};" +
-                          $" уже существует в БД: {existsApartmentsMap.Count}; новых записей: {newItems.Length}");
+                          $" уже существует в БД: {existsApartmentsMap.Count}; из них новых записей: {newItems.Length}");
 
             await uow.Apartments.AddAsync(newItems);
             await uow.SaveChangesAsync();
+
+            if (newItems.Length > 0)
+                _logger.Trace($"{GetType().Name}: Было успешно добавлено {newItems.Length} объявлений в БД:" +
+                              $"\n* {string.Join("\n* ", newItems.Select(x => $"{x.Title} за {x.Price}руб."))}");
 
             // Теперь пишем историю для всех объявлений.
             var apartmentsChanges = new List<ItemChangeEntity>();
@@ -127,10 +131,15 @@ namespace Apartment.Core.Services
                 updatedApartments.Add(newApartment);
             }
 
-            _logger.Trace($"{GetType().Name}: Всего было изменено {updatedApartments.Count} апартаметов и {apartmentsChanges.Count} полей");
             await uow.Apartments.UpdateAsync(updatedApartments);
             await uow.ItemsChanges.AddAsync(apartmentsChanges);
             await uow.SaveChangesAsync();
+
+            _logger.Trace($"{GetType().Name}: Всего было изменено {updatedApartments.Count} апартаметов и {apartmentsChanges.Count} полей");
+
+            if (apartmentsChanges.Count > 0)
+                _logger.Trace($"{GetType().Name}: Были изменены поля у некоторых объявлений:" +
+                              $"\n* {string.Join("\n* ", apartmentsChanges.Select(x => $"[Id {x.ObjectId}] {x.PropertyName}: {x.OldValueJson} ==> {x.NewValueJson}"))}");
         }
 
         public async Task<ICollection<ApartmentInfo>> GetActuallyApartmentsAsync()
