@@ -2,7 +2,10 @@
 using Apartment.App.ViewModels;
 using Apartment.App.Views;
 using Apartment.Common;
+using Apartment.Common.Loggers;
 using Apartment.Core;
+using Apartment.Core.Providers;
+using Apartment.Core.Services;
 using Apartment.Data;
 using Apartment.DataProvider;
 using Apartment.DataProvider.Avito;

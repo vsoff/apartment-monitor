@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Apartment.Common;
+using Apartment.Common.Loggers;
 using Apartment.Common.Workers;
 using Apartment.Core;
+using Apartment.Core.Services;
 using Apartment.DataProvider;
 using Apartment.Options;
 

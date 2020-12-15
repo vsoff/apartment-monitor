@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Apartment.DataProvider.Models;
+using Apartment.Common.Models;
 using Apartment.Options;
 using Flurl;
 using Flurl.Http;

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Navigation;
-using Apartment.DataProvider.Helpers;
-using Apartment.DataProvider.Models;
+using Apartment.Common;
+using Apartment.Common.Models;
 using GMap.NET;
 
 namespace Apartment.App.Models

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Apartment.Core;
-using Apartment.DataProvider.Models;
+using Apartment.Common.Models;
+using Apartment.Core.Services;
+using Apartment.DataProvider;
 
-namespace Apartment.DataProvider.Avito
+namespace Apartment.Core.Providers
 {
     public class DatabaseApartmentsProvider : IApartmentsProvider
     {

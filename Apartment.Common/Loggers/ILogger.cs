@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Apartment.Common
+namespace Apartment.Common.Loggers
 {
     public interface ILogger
     {

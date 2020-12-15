@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Apartment.Common;
+using Apartment.Common.Loggers;
+using Apartment.Common.Models;
+using Apartment.Core.Mappers;
 using Apartment.Data;
 using Apartment.Data.Entities;
 using Apartment.Data.Uow;
-using Apartment.DataProvider.Models;
 using DifferencesSearch;
 using Newtonsoft.Json;
 
-namespace Apartment.Core
+namespace Apartment.Core.Services
 {
     public class ApartmentService
     {
@@ -138,12 +140,12 @@ namespace Apartment.Core
             return apartments.Select(x => x.ToCore()).ToList();
         }
 
-        private async Task<ICollection<DataWithHistory<ApartmentInfo>>> GetActuallyApartmentsWithHistoryAsync()
-        {
-            using var uow = new UnitOfWork(_contextProvider.Create());
-            var apartments = await uow.Apartments.GetAsync(x => x.DisappearedDate == null);
-            // TODO: Подгружать историю
-            throw new NotImplementedException();
-        }
+        //private async Task<ICollection<DataWithHistory<ApartmentInfo>>> GetActuallyApartmentsWithHistoryAsync()
+        //{
+        //    using var uow = new UnitOfWork(_contextProvider.Create());
+        //    var apartments = await uow.Apartments.GetAsync(x => x.DisappearedDate == null);
+        //    // TODO: Подгружать историю
+        //    throw new NotImplementedException();
+        //}
     }
 }

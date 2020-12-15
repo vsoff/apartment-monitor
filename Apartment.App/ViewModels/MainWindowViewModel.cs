@@ -5,8 +5,8 @@ using System.Windows.Input;
 using Apartment.App.Common;
 using Apartment.App.Models;
 using Apartment.Common;
+using Apartment.Common.Models;
 using Apartment.DataProvider;
-using Apartment.DataProvider.Models;
 using GMap.NET;
 
 namespace Apartment.App.ViewModels

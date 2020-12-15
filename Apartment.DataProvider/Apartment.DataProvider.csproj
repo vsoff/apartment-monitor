@@ -8,4 +8,8 @@
     <PackageReference Include="GMap.NET.Core" Version="2.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Apartment.Common\Apartment.Common.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,9 +1,8 @@
 ﻿using System;
-using Apartment.Common;
-using Apartment.Common.Workers;
+using Apartment.Common.Loggers;
 using Serilog.Core;
 
-namespace Apartment.Core
+namespace Apartment.Core.Loggers
 {
     public class SerilogLogger : ILogger
     {

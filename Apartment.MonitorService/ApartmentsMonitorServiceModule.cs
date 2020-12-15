@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using Apartment.Common.Workers;
 using Apartment.Core;
+using Apartment.Core.Services;
 using Apartment.Data;
 using Apartment.DataProvider;
 using Apartment.DataProvider.Avito;

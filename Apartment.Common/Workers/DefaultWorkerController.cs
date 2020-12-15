@@ -1,4 +1,5 @@
 ﻿using System;
+using Apartment.Common.Loggers;
 
 namespace Apartment.Common.Workers
 {

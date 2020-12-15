@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
+using Apartment.Common.Models;
 using Apartment.Data.Entities;
-using Apartment.DataProvider.Models;
-using AutoMapper;
 using GMap.NET;
 using Newtonsoft.Json;
 
-namespace Apartment.Core
+namespace Apartment.Core.Mappers
 {
     public static class ApartmentMapper
     {

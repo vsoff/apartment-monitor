@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Apartment.DataProvider.Helpers;
 using GMap.NET;
 
-namespace Apartment.DataProvider.Models
+namespace Apartment.Common.Models
 {
     public class ApartmentsRegion
     {

@@ -1,8 +1,6 @@
 ﻿using System;
-using Apartment.Common;
-using Apartment.Common.Workers;
 
-namespace Apartment.Core
+namespace Apartment.Common.Loggers
 {
     public class ConsoleLogger : ILogger
     {

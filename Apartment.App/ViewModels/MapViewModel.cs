@@ -8,7 +8,7 @@ using Apartment.App.Common;
 using Apartment.App.Components;
 using Apartment.App.Models;
 using Apartment.App.Views;
-using Apartment.DataProvider.Models;
+using Apartment.Common.Models;
 using Apartment.Options;
 using GMap.NET;
 

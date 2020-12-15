@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
+using Apartment.Core.Loggers;
 using Autofac;
 using Serilog;
-using ILogger = Apartment.Common.ILogger;
+using ILogger = Apartment.Common.Loggers.ILogger;
 
 namespace Apartment.Core
 {

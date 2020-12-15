@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using GMap.NET;
 
-namespace Apartment.DataProvider.Helpers
+namespace Apartment.Common
 {
     public static class CoreModelsHelper
     {

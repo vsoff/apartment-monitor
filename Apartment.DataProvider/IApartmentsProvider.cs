@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Apartment.DataProvider.Models;
+using Apartment.Common.Models;
 
 namespace Apartment.DataProvider
 {

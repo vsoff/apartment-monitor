@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using GMap.NET;
 
-namespace Apartment.DataProvider.Models
+namespace Apartment.Common.Models
 {
     public class ApartmentInfo
     {

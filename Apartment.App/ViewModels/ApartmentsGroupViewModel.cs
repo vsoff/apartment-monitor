@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using Apartment.App.Models;
-using Apartment.DataProvider.Models;
+using Apartment.Common.Models;
 using GMap.NET;
 
 namespace Apartment.App.ViewModels
