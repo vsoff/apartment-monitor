@@ -1,33 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using GMap.NET;
 
 namespace Apartment.Common.Models
 {
-    public class ApartmentsRegion
+    public class Region
     {
-        public string Name;
-        public readonly PointLatLng Center;
+        public int Id { get; }
+        public string Name { get; }
+        public Color Color { get; }
+        public PointLatLng Center { get; }
         public IReadOnlyCollection<PointLatLng> Locations => _locations;
 
         private readonly PointLatLng[] _locations;
         private RectLatLng _rect;
 
-        public ApartmentsRegion(string name, IEnumerable<PointLatLng> locations)
+        public Region(int id, string name, Color color, IEnumerable<PointLatLng> locations)
         {
             if (locations == null) throw new ArgumentNullException(nameof(locations));
             _locations = locations.ToArray();
             if (_locations.Length == 0) throw new ArgumentOutOfRangeException(nameof(locations));
 
-            Name = name;
             _rect = CoreModelsHelper.GetPointsRect(_locations);
+            Id = id;
+            Name = name;
+            Color = color;
             Center = _rect.LocationMiddle;
         }
 
         public bool Contains(PointLatLng location) => _rect.Contains(location) && Contains(_locations, location);
 
-        public override string ToString() => $"[{Locations.Count}] {Name}";
+        public override string ToString() => $"[Id {Id}] {Name}";
 
         /// <summary>
         /// Определяет находится ли точка внутри полигона описывающего регион.

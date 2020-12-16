@@ -55,14 +55,38 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <CheckBox Grid.Row="0" IsChecked="{Binding Path=MapViewModel.IsRegionEditingMode, Mode=TwoWay}" Content="Режим редактирования" />
+                    <CheckBox Grid.Row="0" IsChecked="{Binding Path=MapViewModel.IsRegionEditingMode, Mode=TwoWay}" Content="Режим создания геозон" />
                     <ListView Grid.Row="1"
                               ItemsSource="{Binding Path=MapViewModel.Regions}"
                               SelectedItem="{Binding SelectedRegion, Mode=TwoWay}" />
-                    <WrapPanel Grid.Row="2">
+                    <TextBlock Grid.Row="2" Text="Редактирование:" FontWeight="Bold" Visibility="Collapsed" />
+                    <Grid Grid.Row="3" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Id" />
+                        <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SelectedRegion.Id, Mode=OneWay}" IsReadOnly="True" />
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Название" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SelectedRegion.Name, Mode=OneWay}" />
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Цвет" />
+                        <StackPanel Grid.Row="2" Grid.Column="1">
+                            <Button Height="20" Foreground="Black" Name="ColorPickerColor" Background="Red" Click="Button_Click" />
+                        </StackPanel>
+                    </Grid>
+                    <WrapPanel Grid.Row="4" Visibility="Collapsed">
+                        <Button Content="Сохранить" Command="{Binding DeleteSelectedRegionCommand}" />
                         <Button Content="Удалить" Command="{Binding DeleteSelectedRegionCommand}" />
+                        <Button Content="Закрыть" Command="{Binding DeleteSelectedRegionCommand}" />
                     </WrapPanel>
                 </Grid>
             </TabItem>

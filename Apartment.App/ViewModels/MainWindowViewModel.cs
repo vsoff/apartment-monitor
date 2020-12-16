@@ -1,34 +1,76 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Apartment.App.Common;
 using Apartment.App.Models;
 using Apartment.Common;
 using Apartment.Common.Models;
+using Apartment.Core.Services;
 using Apartment.DataProvider;
 using GMap.NET;
+using Region = Apartment.Common.Models.Region;
 
 namespace Apartment.App.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        private readonly IApartmentsProvider _apartmentsProvider;
+        private static readonly SizeLatLng MergeApartmentsClip = new SizeLatLng(0.0002, 0.0004);
 
-        public MainWindowViewModel(IApartmentsProvider apartmentsProvider, MapViewModel mapViewModel)
+        private readonly IApartmentsProvider _apartmentsProvider;
+        private readonly RegionsService _regionsService;
+        private bool _isInitialized;
+
+        public MainWindowViewModel(
+            IApartmentsProvider apartmentsProvider,
+            RegionsService regionsService,
+            MapViewModel mapViewModel)
         {
             MapViewModel = mapViewModel ?? throw new ArgumentNullException(nameof(mapViewModel));
             _apartmentsProvider = apartmentsProvider ?? throw new ArgumentNullException(nameof(apartmentsProvider));
-            UpdateApartmentsListCommand = new RelayCommand(UpdateApartmentsList, x => true);
+            _regionsService = regionsService ?? throw new ArgumentNullException(nameof(regionsService));
+            InitializeCommand = new RelayCommand(x => Initialize(), x => !_isInitialized);
+            UpdateApartmentsListCommand = new RelayCommand(x => UpdateApartmentsList(), x => true);
             DeleteSelectedRegionCommand = new RelayCommand(DeleteSelectedRegion, x => SelectedRegion != null);
+            mapViewModel.RegionCreated += (sender, locations) => OnRegionCreated(locations);
         }
 
-        private static readonly SizeLatLng MergeApartmentsClip = new SizeLatLng(0.0002, 0.0004);
+        private async void Initialize()
+        {
+            if (_isInitialized) throw new InvalidOperationException($"Метод {nameof(Initialize)} был вызван повторно");
+
+            _isInitialized = true;
+            await UpdateRegionsList();
+            await UpdateApartmentsList();
+        }
+
+        private async void OnRegionCreated(IEnumerable<PointLatLng> locations)
+        {
+            if (locations == null) throw new ArgumentNullException(nameof(locations));
+
+            // TODO Вьюха для заполнения данных о новом регионе.
+            var region = new Region(0, "Новый регион", Color.Blue, locations);
+            var addedRegion = await _regionsService.AddRegionAsync(region);
+            MapViewModel.Regions.Add(addedRegion);
+        }
+
+        /// <summary>
+        /// Обновляет актуальный список регионов.
+        /// </summary>
+        private async Task UpdateRegionsList()
+        {
+            var regions = await _regionsService.GetAllRegionsAsync();
+            MapViewModel.Regions.Clear();
+            foreach (var region in regions)
+                MapViewModel.Regions.Add(region);
+        }
 
         /// <summary>
         /// Обновляет актуальный список квартир.
         /// </summary>
-        private async void UpdateApartmentsList(object _)
+        private async Task UpdateApartmentsList()
         {
             var actualApartments = (await _apartmentsProvider.GetApartmentsAsync())
                 .DistinctBy(x => x.ExternalId).OrderBy(x => x.Price).ToArray();
@@ -73,12 +115,14 @@ namespace Apartment.App.ViewModels
         /// <summary>
         /// Удаляет выбранный регион.
         /// </summary>
-        private void DeleteSelectedRegion(object _)
+        private async void DeleteSelectedRegion(object _)
         {
             if (SelectedRegion == null)
                 return;
 
+            await _regionsService.DeleteRegionAsync(SelectedRegion.Id);
             MapViewModel.Regions.Remove(SelectedRegion);
+            //await UpdateRegionsList();
         }
 
         #region Binding
@@ -111,12 +155,12 @@ namespace Apartment.App.ViewModels
 
         #region Regions
 
-        private ApartmentsRegion _selectedRegion;
+        private Region _selectedRegion;
 
         /// <summary>
         /// Выбранная квартира.
         /// </summary>
-        public ApartmentsRegion SelectedRegion
+        public Region SelectedRegion
         {
             get => _selectedRegion;
             set
@@ -142,6 +186,11 @@ namespace Apartment.App.ViewModels
         /// Команда удаления выделенного региона.
         /// </summary>
         public ICommand DeleteSelectedRegionCommand { get; }
+
+        /// <summary>
+        /// Команда инициализации.
+        /// </summary>
+        public ICommand InitializeCommand { get; }
 
         #endregion
     }

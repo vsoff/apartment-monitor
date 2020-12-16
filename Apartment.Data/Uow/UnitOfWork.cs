@@ -16,6 +16,7 @@ namespace Apartment.Data.Uow
 
             _repositoriesMap = new Dictionary<Type, IRepository>
             {
+                [typeof(RegionEntity)] = new Repository<RegionEntity>(context),
                 [typeof(ApartmentEntity)] = new Repository<ApartmentEntity>(context),
                 [typeof(ItemChangeEntity)] = new Repository<ItemChangeEntity>(context)
             };
@@ -29,6 +30,7 @@ namespace Apartment.Data.Uow
             return (IRepository<T>) repository;
         }
 
+        public IRepository<RegionEntity> Regions => Set<RegionEntity>();
         public IRepository<ApartmentEntity> Apartments => Set<ApartmentEntity>();
         public IRepository<ItemChangeEntity> ItemsChanges => Set<ItemChangeEntity>();
 

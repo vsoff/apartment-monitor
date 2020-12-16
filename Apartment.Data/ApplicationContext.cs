@@ -38,12 +38,14 @@ namespace Apartment.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ItemChangeEntity>().ToTable(nameof(ItemChangeEntity));
+            modelBuilder.Entity<RegionEntity>().ToTable(RegionEntity.TableName);
+            modelBuilder.Entity<ItemChangeEntity>().ToTable(ItemChangeEntity.TableName);
             modelBuilder.Entity<ApartmentEntity>().ToTable(ApartmentEntity.TableName);
             modelBuilder.Entity<ApartmentEntity>().HasIndex(u => u.ExternalId).IsUnique();
         }
 
         public DbSet<ItemChangeEntity> ItemChanges { get; set; }
         public DbSet<ApartmentEntity> Apartments { get; set; }
+        public DbSet<RegionEntity> Regions { get; set; }
     }
 }

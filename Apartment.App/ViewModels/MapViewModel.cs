@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Windows;
 using System.Windows.Input;
 using Apartment.App.Common;
-using Apartment.App.Components;
 using Apartment.App.Models;
 using Apartment.App.Views;
 using Apartment.Common.Models;
@@ -20,21 +18,22 @@ namespace Apartment.App.ViewModels
         public bool IsRegionEditingMode { get; set; }
 
         public ObservableCollection<ApartmentsGroup> Apartments { get; }
-        public ObservableCollection<ApartmentsRegion> Regions { get; }
+        public ObservableCollection<Region> Regions { get; }
 
         public EventHandler<object> ItemsAdded;
         public EventHandler<object> ItemsRemoved;
+        public EventHandler<IEnumerable<PointLatLng>> RegionCreated;
         public EventHandler<PointLatLng> CurrentPositionChanged;
 
         public ICommand AddNewRegionPointCommand { get; }
-        public ICommand FlushNewRegionPointCommand { get; }
+        public ICommand CreateRegionCommand { get; }
         public ICommand OpenMarkerInfoCommand { get; }
 
         public MapViewModel(ApplicationOptions options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             AddNewRegionPointCommand = new RelayCommand(x => AddNewRegionPoint((PointLatLng) x), x => IsRegionEditingMode);
-            FlushNewRegionPointCommand = new RelayCommand(x => FlushNewRegion(), x => IsRegionEditingMode);
+            CreateRegionCommand = new RelayCommand(x => FlushNewRegion(), x => IsRegionEditingMode);
             // TODO: Убрать нарушение MVVM.
             OpenMarkerInfoCommand = new RelayCommand(x => new ApartmentsGroupWindow(x as ApartmentsGroup).ShowDialog());
             IsRegionEditingMode = false;
@@ -47,7 +46,7 @@ namespace Apartment.App.ViewModels
             apartments.Clearing += CollectionClearing;
             Apartments = apartments;
 
-            var regions = new FixedObservableCollection<ApartmentsRegion>();
+            var regions = new FixedObservableCollection<Region>();
             regions.CollectionChanged += DrawableCollectionChanged;
             regions.Clearing += CollectionClearing;
             Regions = regions;
@@ -98,7 +97,7 @@ namespace Apartment.App.ViewModels
 
             // Добавляем новоиспечённый регион.
             if (locations.Count > 2)
-                Regions.Add(new ApartmentsRegion($"Новый регион {DateTime.Now}", locations));
+                RegionCreated?.Invoke(this, locations);
         }
 
         private void AddNewRegionPoint(PointLatLng point)

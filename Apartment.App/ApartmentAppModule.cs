@@ -23,17 +23,15 @@ namespace Apartment.App
             builder.RegisterType<MainWindow>().AsSelf();
             builder.RegisterType<MainWindowViewModel>().AsSelf();
             builder.RegisterType<MapViewModel>().AsSelf();
+            builder.RegisterType<RegionsService>().AsSelf();
+            builder.RegisterType<ApartmentService>().AsSelf();
+            builder.RegisterType<ApplicationContextProvider>().As<IDatabaseContextProvider>();
 
             var config = RegisterOptions(builder);
-
             if (config.UseOriginalProvider)
                 builder.RegisterType<AvitoApartmentsProvider>().As<IApartmentsProvider>();
             else
-            {
-                builder.RegisterType<ApartmentService>().AsSelf();
-                builder.RegisterType<ApplicationContextProvider>().As<IDatabaseContextProvider>();
                 builder.RegisterType<DatabaseApartmentsProvider>().As<IApartmentsProvider>();
-            }
         }
 
         private ApplicationOptions RegisterOptions(ContainerBuilder builder)

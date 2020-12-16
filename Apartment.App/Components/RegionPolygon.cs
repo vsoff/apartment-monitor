@@ -16,6 +16,11 @@ namespace Apartment.App.Components
         private readonly Brush _strokeBrush;
         private readonly Brush _fillBrush;
 
+        public RegionPolygon(IEnumerable<PointLatLng> points, string name, System.Drawing.Color color)
+            : this(points, name, Color.FromRgb(color.R, color.G, color.B))
+        {
+        }
+
         public RegionPolygon(IEnumerable<PointLatLng> points, string name, Color color) : base(points)
         {
             if (points == null) throw new ArgumentNullException(nameof(points));

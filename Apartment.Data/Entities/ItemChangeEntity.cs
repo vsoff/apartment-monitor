@@ -2,6 +2,8 @@
 {
     public class ItemChangeEntity : Entity
     {
+        public static readonly string TableName = nameof(ItemChangeEntity);
+
         public int ObjectId { get; set; }
         public string Table { get; set; }
         public string PropertyTypeFullName { get; set; }

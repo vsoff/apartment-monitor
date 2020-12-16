@@ -59,7 +59,7 @@ namespace Apartment.App.Views
                 if (Math.Abs(newPoint.X - leftPoint.Value.X) < double.Epsilon && Math.Abs(newPoint.Y - leftPoint.Value.Y) < double.Epsilon)
                 {
                     if (_viewModel.AddNewRegionPointCommand.CanExecute(null))
-                        _viewModel.AddNewRegionPointCommand?.Execute(MapControl.Position);
+                        _viewModel.AddNewRegionPointCommand.Execute(MapControl.Position);
                 }
             };
             MouseLeftButtonDown += (sender, args) => { leftPoint = args.GetPosition(this); };
@@ -73,8 +73,8 @@ namespace Apartment.App.Views
                 var newPoint = args.GetPosition(this);
                 if (Math.Abs(newPoint.X - rightPoint.Value.X) < double.Epsilon && Math.Abs(newPoint.Y - rightPoint.Value.Y) < double.Epsilon)
                 {
-                    if (_viewModel.FlushNewRegionPointCommand.CanExecute(null))
-                        _viewModel.FlushNewRegionPointCommand?.Execute(MapControl.Position);
+                    if (_viewModel.CreateRegionCommand.CanExecute(null))
+                        _viewModel.CreateRegionCommand.Execute(MapControl.Position);
                 }
             };
             MouseRightButtonDown += (sender, args) => { rightPoint = args.GetPosition(this); };
@@ -145,10 +145,10 @@ namespace Apartment.App.Views
                 });
             }
 
-            if (type == typeof(ApartmentsRegion))
+            if (type == typeof(Region))
             {
-                var data = obj as ApartmentsRegion;
-                return new RegionPolygon(data.Locations, data.Name, Colors.LightSkyBlue);
+                var data = obj as Region;
+                return new RegionPolygon(data.Locations, data.Name, data.Color);
             }
 
             throw new ArgumentException($"Неизвестный тип {type.FullName}", nameof(obj));
