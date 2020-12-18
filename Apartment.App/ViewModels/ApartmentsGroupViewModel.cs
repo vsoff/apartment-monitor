@@ -26,7 +26,7 @@ namespace Apartment.App.ViewModels
     public class ApartmentDataViewModel : ViewModelBase
     {
         public string Id => _apartment.ExternalId;
-        public int Price => _apartment.Price;
+        public int? Price => _apartment.Price;
         public string Url => _apartment.Url;
         public DateTime PublishingDate => _apartment.PublishingDate;
         public string Title => _apartment.Title;

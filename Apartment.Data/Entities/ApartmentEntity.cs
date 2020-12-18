@@ -24,7 +24,7 @@ namespace Apartment.Data.Entities
         /// <summary>
         /// Цена.
         /// </summary>
-        public int Price { get; set; }
+        public int? Price { get; set; }
 
         /// <summary>
         /// Url объявления.
@@ -55,7 +55,7 @@ namespace Apartment.Data.Entities
         /// <summary>
         /// Площадь м².
         /// </summary>
-        public double Area { get; set; }
+        public double? Area { get; set; }
 
         /// <summary>
         /// Заголовок объявения.

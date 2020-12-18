@@ -29,14 +29,17 @@ namespace Apartment.App.Models
             if (apartments.Count == 1)
                 return ToText(apartments.First().Price);
 
-            var orderedApartments = apartments.OrderBy(x => x.Price).ToArray();
+            var orderedApartments = apartments.Where(x => x.Price.HasValue).OrderBy(x => x.Price).ToArray();
+            if (orderedApartments.Length == 0)
+                return $"[{apartments.Count} кв.] без цены";
+
             var priceMin = orderedApartments.First();
             var priceMax = orderedApartments.Last();
 
             return $"[{apartments.Count} кв.] {ToText(priceMin.Price)}-{ToText(priceMax.Price)}кк руб.";
         }
 
-        private static string ToText(int price) => (price / (double) 1000000).ToString("F1");
+        private static string ToText(int? price) => price.HasValue ? (price.Value / (double) 1000000).ToString("F1") : "без цены";
 
         public override string ToString() => Title;
     }

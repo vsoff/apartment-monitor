@@ -24,20 +24,20 @@ namespace Apartment.DataProvider.Avito
         private static readonly string RequestQueryParameters = $@"
 categoryId: 24
 locationId: 648220
-{MaxPriceTag}: 2500000
 correctorMode: 0
 {PageTag}: 1
-map: eyJzZWFyY2hBcmVhIjp7ImxhdEJvdHRvbSI6NjEuNzEyMDc3MzAwOTA2MjIsImxhdFRvcCI6NjEuODMzMzc2MDU1NTM0MzQ1LCJsb25MZWZ0IjozNC4yNTkzNTE2ODY2MTM5NTQsImxvblJpZ2h0IjozNC41Mjg1MTY3MjU2NzY0NzV9fQ==
+map: eyJzZWFyY2hBcmVhIjp7ImxhdEJvdHRvbSI6NjEuNjg0MDc0NTU4MzYwMzgsImxhdFRvcCI6NjEuODEyNDU3NjkwNzQwNCwibG9uTGVmdCI6MzQuMjgxMzI5OTQ4MzE0NTg1LCJsb25SaWdodCI6MzQuNDY4Nzg0MTcxOTQ3NH19
 params[201]: 1059
-params[497][from]: 5184
-params[497][to]: 0
+params[2952][from]: 3
 filterCategoryId: 24
-searchArea[latBottom]: 61.71207730090622
-searchArea[lonLeft]: 34.259351686613954
-searchArea[latTop]: 61.833376055534345
-searchArea[lonRight]: 34.528516725676475
-viewPort[width]: 784
-viewPort[height]: 747
+verticalCategoryId: 1
+rootCategoryId: 4
+searchArea[latBottom]: 61.68407455836038
+searchArea[lonLeft]: 34.281329948314585
+searchArea[latTop]: 61.8124576907404
+searchArea[lonRight]: 34.4687841719474
+viewPort[width]: 546
+viewPort[height]: 790
 {LimitTag}: 10";
 
         public AvitoApartmentsProvider(DebugOptions options)
@@ -57,22 +57,13 @@ viewPort[height]: 747
                 string jsonContent;
                 if (File.Exists(cacheFile))
                 {
-                    jsonContent = File.ReadAllText(cacheFile);
+                    jsonContent = await File.ReadAllTextAsync(cacheFile);
                     var cacheItems = JsonConvert.DeserializeObject<List<Item>>(jsonContent);
                     items.AddRange(cacheItems);
                 }
                 else
                 {
-                    for (int page = 1;; page++)
-                    {
-                        var url = BuildUrl(page, limit, maxPrice);
-
-                        var response = await url.GetJsonAsync<AvitoApartmentsResponse>();
-                        items.AddRange(response.items);
-
-                        if (page * limit >= response.count)
-                            break;
-                    }
+                    items = await GetApartmentsFromAllPages(limit, null);
 
                     jsonContent = JsonConvert.SerializeObject(items);
                     File.WriteAllText(cacheFile, jsonContent);
@@ -80,16 +71,7 @@ viewPort[height]: 747
             }
             else
             {
-                for (int page = 1;; page++)
-                {
-                    var url = BuildUrl(page, limit, maxPrice);
-
-                    var response = await url.GetJsonAsync<AvitoApartmentsResponse>();
-                    items.AddRange(response.items);
-
-                    if (page * limit >= response.count)
-                        break;
-                }
+                items = await GetApartmentsFromAllPages(limit, null);
             }
 
             return items.Select(x =>
@@ -117,11 +99,32 @@ viewPort[height]: 747
                     Area = area,
                     Title = x.title,
                     Address = x.geo.formattedAddress,
-                    PublishingDate = DateTimeOffset.FromUnixTimeSeconds(x.time).UtcDateTime,
+                    PublishingDate = x.time.HasValue ? DateTimeOffset.FromUnixTimeSeconds(x.time.Value).UtcDateTime : DateTime.MinValue,
                     DisappearedDate = null,
                     ImageUrls = x.images.Select(i => i.SmallSize).ToArray()
                 };
             }).ToArray();
+        }
+
+        private async Task<List<Item>> GetApartmentsFromAllPages(int partitionSize, int? maxPrice)
+        {
+            var items = new List<Item>();
+            for (int page = 1;; page++)
+            {
+                var url = BuildUrl(page, partitionSize, maxPrice);
+
+                var responseJson = await url.GetStringAsync();
+                var response = JsonConvert.DeserializeObject<AvitoApartmentsResponse>(responseJson);
+                if (response.items == null)
+                    throw new AvitoException("Авито вернули ошибку вместо ответа");
+
+                items.AddRange(response.items);
+
+                if (page * partitionSize >= response.count)
+                    break;
+            }
+
+            return items;
         }
 
         /// <summary>
@@ -131,7 +134,7 @@ viewPort[height]: 747
         /// <param name="limit">Объектов на одной странице.</param>
         /// <param name="maxPrice">Максимальная цена квартиры.</param>
         /// <returns>URL запроса</returns>
-        private string BuildUrl(int page, int limit, int maxPrice)
+        private string BuildUrl(int page, int limit, int? maxPrice)
         {
             // Парсим параметры.
             var parameters = new Dictionary<string, string>();
@@ -150,11 +153,19 @@ viewPort[height]: 747
             // Пересечиваем параметры.
             parameters[PageTag] = page.ToString();
             parameters[LimitTag] = limit.ToString();
-            parameters[MaxPriceTag] = maxPrice.ToString();
+            if (maxPrice.HasValue)
+                parameters[MaxPriceTag] = maxPrice.ToString();
 
             // Собираем URL.
             var queries = string.Join("&", parameters.Select(x => $"{Url.Encode(x.Key)}={Url.Encode(x.Value)}"));
             return $"{RequestUrl}?{queries}";
+        }
+    }
+
+    public class AvitoException : Exception
+    {
+        public AvitoException(string message) : base(message)
+        {
         }
     }
 }

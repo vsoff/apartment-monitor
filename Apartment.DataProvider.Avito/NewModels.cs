@@ -27,18 +27,18 @@ namespace Apartment.DataProvider.Avito
         public bool hasVideo { get; set; }
         public Category category { get; set; }
         public Ext ext { get; set; }
-        public int price { get; set; }
+        public int? price { get; set; }
         public Location location { get; set; }
         public Coords coords { get; set; }
-        public int time { get; set; }
+        public long? time { get; set; }
         public Priceformatted priceFormatted { get; set; }
         public Geo geo { get; set; }
     }
 
     internal class Category
     {
-        public int id { get; set; }
-        public int rootId { get; set; }
+        public int? id { get; set; }
+        public int? rootId { get; set; }
         public string slug { get; set; }
         public bool compare { get; set; }
     }
@@ -70,20 +70,20 @@ namespace Apartment.DataProvider.Avito
         public string status { get; set; }
         public int[] vid_iz_okon { get; set; }
         public string balkon_ili_lodzhiya { get; set; }
-        public int god_postroiki { get; set; }
+        public int? god_postroiki { get; set; }
         public string area { get; set; }
         public Title title { get; set; }
         public string otdelka { get; set; }
         public string development_property_engine_id { get; set; }
         public string proektnaya_deklaratsiya { get; set; }
         public string ofitsialnyy_zastroyshchik { get; set; }
-        public int tip_uchastiya { get; set; }
+        public int? tip_uchastiya { get; set; }
         public string korpus_stroenie { get; set; }
         public string nazvanie_obekta_nedvizhimosti { get; set; }
-        public int korpus { get; set; }
-        public int nazvanie_novostroyki { get; set; }
+        public int? korpus { get; set; }
+        public int? nazvanie_novostroyki { get; set; }
         public int[] tip_komnat { get; set; }
-        public float vysota_potolkov { get; set; }
+        public float? vysota_potolkov { get; set; }
     }
 
     internal class Title
@@ -105,8 +105,8 @@ namespace Apartment.DataProvider.Avito
     {
         public double lat { get; set; }
         public double lng { get; set; }
-        public int zoom { get; set; }
-        public int precision { get; set; }
+        public int? zoom { get; set; }
+        public int? precision { get; set; }
         public string address_user { get; set; }
     }
 
@@ -121,7 +121,7 @@ namespace Apartment.DataProvider.Avito
         [JsonProperty("string")]
         public string String { get; set; }
 
-        public int value { get; set; }
+        public int? value { get; set; }
         public string exponent { get; set; }
     }
 
