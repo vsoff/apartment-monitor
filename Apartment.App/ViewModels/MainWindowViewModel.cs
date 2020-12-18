@@ -33,7 +33,9 @@ namespace Apartment.App.ViewModels
             _regionsService = regionsService ?? throw new ArgumentNullException(nameof(regionsService));
             InitializeCommand = new RelayCommand(x => Initialize(), x => !_isInitialized);
             UpdateApartmentsListCommand = new RelayCommand(x => UpdateApartmentsList(), x => true);
+            SaveSelectedRegionChangesCommand = new RelayCommand(SaveSelectedRegion, x => SelectedRegion != null);
             DeleteSelectedRegionCommand = new RelayCommand(DeleteSelectedRegion, x => SelectedRegion != null);
+            CancelSelectedRegionCommand = new RelayCommand(CancelSelectedRegion, x => SelectedRegion != null);
             mapViewModel.RegionCreated += (sender, locations) => OnRegionCreated(locations);
         }
 
@@ -51,7 +53,7 @@ namespace Apartment.App.ViewModels
             if (locations == null) throw new ArgumentNullException(nameof(locations));
 
             // TODO Вьюха для заполнения данных о новом регионе.
-            var region = new Region(0, "Новый регион", Color.Blue, locations);
+            var region = new Region(0, "Новый регион", "#0000FF", locations);
             var addedRegion = await _regionsService.AddRegionAsync(region);
             MapViewModel.Regions.Add(addedRegion);
         }
@@ -112,6 +114,21 @@ namespace Apartment.App.ViewModels
         }
 
 
+        private async void SaveSelectedRegion(object _)
+        {
+            if (SelectedRegion == null)
+                return;
+
+            var region = await _regionsService.UpdateRegionAsync(SelectedRegion);
+            MapViewModel.Regions.Remove(SelectedRegion);
+            MapViewModel.Regions.Add(region);
+        }
+
+        private async void CancelSelectedRegion(object _)
+        {
+            SelectedRegion = null;
+        }
+
         /// <summary>
         /// Удаляет выбранный регион.
         /// </summary>
@@ -155,6 +172,8 @@ namespace Apartment.App.ViewModels
 
         #region Regions
 
+        public RegionEditViewModel SelectedRegionViewModel { get; private set; }
+
         private Region _selectedRegion;
 
         /// <summary>
@@ -171,7 +190,9 @@ namespace Apartment.App.ViewModels
                 if (_selectedRegion != null)
                     MapViewModel.SetCurrentPosition(_selectedRegion.Center);
 
+                SelectedRegionViewModel = _selectedRegion == null ? null : new RegionEditViewModel(_selectedRegion);
                 OnPropertyChanged(nameof(SelectedRegion));
+                OnPropertyChanged(nameof(SelectedRegionViewModel));
             }
         }
 
@@ -186,6 +207,10 @@ namespace Apartment.App.ViewModels
         /// Команда удаления выделенного региона.
         /// </summary>
         public ICommand DeleteSelectedRegionCommand { get; }
+
+        public ICommand SaveSelectedRegionChangesCommand { get; }
+
+        public ICommand CancelSelectedRegionCommand { get; }
 
         /// <summary>
         /// Команда инициализации.

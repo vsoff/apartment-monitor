@@ -10,6 +10,11 @@ namespace Apartment.Data
         private readonly string _connectionString;
         private readonly DataProviderType _providerType;
 
+        // TODO: Удалить потом. Добавил на время разработки, чтобы проводить миграции.
+        private ApplicationContext() : this("Data Source=localhost;Initial Catalog=ApartmentsTest;Integrated Security=True;MultipleActiveResultSets=True", DataProviderType.MsSql)
+        {
+        }
+
         public ApplicationContext(string connectionString, DataProviderType providerType)
         {
             _connectionString = connectionString;

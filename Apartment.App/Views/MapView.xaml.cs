@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Apartment.App.Common;
 using Apartment.App.Components;
 using Apartment.App.Models;
 using Apartment.App.ViewModels;
@@ -148,7 +149,7 @@ namespace Apartment.App.Views
             if (type == typeof(Region))
             {
                 var data = obj as Region;
-                return new RegionPolygon(data.Locations, data.Name, data.Color);
+                return new RegionPolygon(data.Locations, data.Name, data.ColorHex.ParseColor());
             }
 
             throw new ArgumentException($"Неизвестный тип {type.FullName}", nameof(obj));

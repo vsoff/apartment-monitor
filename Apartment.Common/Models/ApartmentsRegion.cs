@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using GMap.NET;
 
@@ -10,14 +9,14 @@ namespace Apartment.Common.Models
     {
         public int Id { get; }
         public string Name { get; }
-        public Color Color { get; }
+        public string ColorHex { get; }
         public PointLatLng Center { get; }
         public IReadOnlyCollection<PointLatLng> Locations => _locations;
 
         private readonly PointLatLng[] _locations;
         private RectLatLng _rect;
 
-        public Region(int id, string name, Color color, IEnumerable<PointLatLng> locations)
+        public Region(int id, string name, string colorHex, IEnumerable<PointLatLng> locations)
         {
             if (locations == null) throw new ArgumentNullException(nameof(locations));
             _locations = locations.ToArray();
@@ -26,7 +25,7 @@ namespace Apartment.Common.Models
             _rect = CoreModelsHelper.GetPointsRect(_locations);
             Id = id;
             Name = name;
-            Color = color;
+            ColorHex = colorHex;
             Center = _rect.LocationMiddle;
         }
 

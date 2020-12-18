@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Collections.Generic;
 using Apartment.Common.Models;
 using Apartment.Data.Entities;
 using GMap.NET;
@@ -17,9 +15,7 @@ namespace Apartment.Core.Mappers
             {
                 Id = data.Id,
                 Name = data.Name,
-                ColorR = data.Color.R,
-                ColorG = data.Color.G,
-                ColorB = data.Color.B,
+                ColorHex = data.ColorHex,
                 PointsJson = JsonConvert.SerializeObject(data.Locations)
             };
         }
@@ -27,9 +23,8 @@ namespace Apartment.Core.Mappers
         public static Region ToCore(this RegionEntity data)
         {
             if (data == null) return null;
-            var color = Color.FromArgb(data.ColorR, data.ColorG, data.ColorB);
             var locations = JsonConvert.DeserializeObject<ICollection<PointLatLng>>(data.PointsJson);
-            return new Region(data.Id, data.Name, color, locations);
+            return new Region(data.Id, data.Name, data.ColorHex, locations);
         }
     }
 }

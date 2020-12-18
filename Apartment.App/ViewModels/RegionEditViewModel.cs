@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using System.Windows.Media;
-using Brush = System.Drawing.Brush;
+using Apartment.App.Common;
 using Region = Apartment.Common.Models.Region;
 
 namespace Apartment.App.ViewModels
@@ -12,7 +9,7 @@ namespace Apartment.App.ViewModels
     {
         private readonly Region _region;
 
-        public int Id { get; }
+        public int Id => _region.Id;
 
         public string Name
         {
@@ -35,13 +32,12 @@ namespace Apartment.App.ViewModels
             _region = region ?? throw new ArgumentNullException(nameof(region));
             _region = region;
             _name = _region.Name;
-            _color = new SolidColorBrush(System.Windows.Media.Color.FromRgb(_region.Color.R, _region.Color.G, _region.Color.B));
+            _color = new SolidColorBrush(region.ColorHex.ParseColor());
         }
 
         public Region GetNewRegion()
         {
-            var color = _color.Color;
-            return new Region(_region.Id, _name, System.Drawing.Color.FromArgb(color.R, color.G, color.B), _region.Locations);
+            return new Region(_region.Id, _name, _color.Color.ToHexString(), _region.Locations);
         }
     }
 }

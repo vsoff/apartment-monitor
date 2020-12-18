@@ -35,6 +35,15 @@ namespace Apartment.Core.Services
             return regions.Select(x => x.ToCore()).ToArray();
         }
 
+        public async Task<Region> UpdateRegionAsync(Region region)
+        {
+            using var uow = new UnitOfWork(_contextProvider.Create());
+            var entity = region.ToEntity();
+            await uow.Regions.UpdateAsync(entity);
+            await uow.SaveChangesAsync();
+            return entity.ToCore();
+        }
+
         public async Task DeleteRegionAsync(int regionId)
         {
             using var uow = new UnitOfWork(_contextProvider.Create());
