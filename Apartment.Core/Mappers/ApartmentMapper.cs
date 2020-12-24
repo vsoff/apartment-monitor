@@ -25,7 +25,7 @@ namespace Apartment.Core.Mappers
                 Area = data.Area,
                 Title = data.Title,
                 Address = data.Address,
-                PublishingDate = data.PublishingDate,
+                PublishingDate = data.PublishingDateUtc,
                 DisappearedDate = data.DisappearedDate,
                 ImageUrlsJson = JsonConvert.SerializeObject(data.ImageUrls)
             };
@@ -47,8 +47,9 @@ namespace Apartment.Core.Mappers
                 Area = data.Area,
                 Title = data.Title,
                 Address = data.Address,
-                PublishingDate = data.PublishingDate,
+                PublishingDateUtc = data.PublishingDate,
                 DisappearedDate = data.DisappearedDate,
+                CreatedAtUtc = data.CreatedAtUtc,
                 ImageUrls = JsonConvert.DeserializeObject<ICollection<string>>(data.ImageUrlsJson)
             };
         }

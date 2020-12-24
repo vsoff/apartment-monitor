@@ -99,7 +99,7 @@ viewPort[height]: 790
                     Area = area,
                     Title = x.title,
                     Address = x.geo.formattedAddress,
-                    PublishingDate = x.time.HasValue ? DateTimeOffset.FromUnixTimeSeconds(x.time.Value).UtcDateTime : DateTime.MinValue,
+                    PublishingDateUtc = x.time.HasValue ? DateTimeOffset.FromUnixTimeSeconds(x.time.Value).UtcDateTime : DateTime.MinValue,
                     DisappearedDate = null,
                     ImageUrls = x.images.Select(i => i.SmallSize).ToArray()
                 };

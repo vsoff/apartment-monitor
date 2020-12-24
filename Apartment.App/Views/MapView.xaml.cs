@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -24,6 +23,17 @@ namespace Apartment.App.Views
     /// </summary>
     public partial class MapView : UserControl
     {
+        /// <summary>
+        /// Уровень слоя на карте по типу объекта.
+        /// </summary>
+        private static readonly Dictionary<Type, int> ZIndexMap = new Dictionary<Type, int>
+        {
+            [typeof(Region)] = 1,
+            [typeof(NewRegionData)] = 3,
+            [typeof(NewRegionPoint)] = 5,
+            [typeof(ApartmentsGroup)] = 10,
+        };
+
         public PointLatLng LastPosition;
         private readonly Dictionary<object, GMapMarker> _markerByObjectMap;
         private MapViewModel _viewModel;
@@ -44,7 +54,7 @@ namespace Apartment.App.Views
             MapControl.MouseWheelZoomType = MouseWheelZoomType.MousePositionWithoutCenter;
             MapControl.CanDragMap = true;
             MapControl.DragButton = MouseButton.Left;
-
+            MapControl.IgnoreMarkerOnMouseWheel = true;
             #endregion
 
             #region Events
@@ -88,22 +98,17 @@ namespace Apartment.App.Views
             var viewModel = e.NewValue as MapViewModel;
             if (viewModel == null) throw new ArgumentNullException(nameof(_viewModel));
             _viewModel = viewModel;
-            _viewModel.ItemsAdded += (o, data) => AddObject(data, MapLayer.Apartments);
+            _viewModel.ItemsAdded += (o, data) => AddObject(data);
             _viewModel.ItemsRemoved += (o, data) => RemoveObjectIfExists(data);
             _viewModel.CurrentPositionChanged += (o, position) => MapControl.Position = position;
             _viewModel.SetCurrentPosition(_viewModel.StartPosition);
         }
 
-        private int GetZIndex(MapLayer layer)
+        private int GetZIndex(object data)
         {
-            switch (layer)
-            {
-                case MapLayer.Apartments: return 10;
-                case MapLayer.Regions: return 1;
-                case MapLayer.NewRegion: return 2;
-                case MapLayer.NewRegionPoints: return 3;
-                default: return 0;
-            }
+            var type = data.GetType();
+            ZIndexMap.TryGetValue(type, out var zIndex);
+            return zIndex;
         }
 
         [SuppressMessage("ReSharper", "PossibleNullReferenceException")]
@@ -158,12 +163,12 @@ namespace Apartment.App.Views
         /// <summary>
         /// Добавляет объект на карту.
         /// </summary>
-        public void AddObject(object obj, MapLayer layer)
+        public void AddObject(object obj)
         {
             if (obj is IEnumerable objects)
             {
                 foreach (var objectsItem in objects)
-                    AddObject(objectsItem, layer);
+                    AddObject(objectsItem);
                 return;
             }
 
@@ -171,7 +176,7 @@ namespace Apartment.App.Views
                 throw new ArgumentException("Этот объект уже добавлен на карту");
 
             var marker = CreateMarker(obj);
-            var zIndex = GetZIndex(layer);
+            var zIndex = GetZIndex(obj);
             marker.ZIndex = zIndex;
 
             _markerByObjectMap.Add(obj, marker);
@@ -196,15 +201,5 @@ namespace Apartment.App.Views
             _markerByObjectMap.Remove(marker);
             MapControl.Markers.Remove(marker);
         }
-    }
-
-    // TODO: Удалить слои.
-    public enum MapLayer
-    {
-        Undefined,
-        NewRegion,
-        NewRegionPoints,
-        Regions,
-        Apartments
     }
 }

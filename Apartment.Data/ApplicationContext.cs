@@ -46,6 +46,7 @@ namespace Apartment.Data
             modelBuilder.Entity<RegionEntity>().ToTable(RegionEntity.TableName);
             modelBuilder.Entity<ItemChangeEntity>().ToTable(ItemChangeEntity.TableName);
             modelBuilder.Entity<ApartmentEntity>().ToTable(ApartmentEntity.TableName);
+            modelBuilder.Entity<ApartmentEntity>().Property(x=>x.ExternalId).HasMaxLength(200);
             modelBuilder.Entity<ApartmentEntity>().HasIndex(u => u.ExternalId).IsUnique();
         }
 

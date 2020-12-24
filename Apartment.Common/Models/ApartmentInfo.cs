@@ -67,7 +67,7 @@ namespace Apartment.Common.Models
         /// <summary>
         /// Дата публикации объявления.
         /// </summary>
-        public DateTime PublishingDate { get; set; }
+        public DateTime PublishingDateUtc { get; set; }
 
         /// <summary>
         /// Дата исчезновения объявления.
@@ -78,5 +78,10 @@ namespace Apartment.Common.Models
         /// Json с коллекцией ссылок на изображения.
         /// </summary>
         public ICollection<string> ImageUrls { get; set; }
+
+        /// <summary>
+        /// Дата добавления объявления в базу приложения.
+        /// </summary>
+        public DateTime CreatedAtUtc { get; set; }
     }
 }

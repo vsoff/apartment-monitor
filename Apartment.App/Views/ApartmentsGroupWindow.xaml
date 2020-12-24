@@ -13,6 +13,7 @@
             <Setter Property="Width" Value="15" />
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Window.Resources>
     <ScrollViewer>
         <ItemsControl ItemsSource="{Binding Apartments}">
@@ -24,11 +25,15 @@
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Vertical" Margin="0,5">
-                        <TextBlock>
-                            <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="Hyperlink_RequestNavigate">
-                                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="20" />
-                            </Hyperlink>
-                        </TextBlock>
+                        <WrapPanel>
+                            <TextBlock>
+                                <Hyperlink NavigateUri="{Binding Url}" RequestNavigate="Hyperlink_RequestNavigate">
+                                    <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="20" />
+                                </Hyperlink>
+                            </TextBlock>
+                            <TextBlock Text="[Новое]" Foreground="Crimson" FontWeight="Bold" FontSize="15"
+                                       Visibility="{Binding Path=IsNewest,Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        </WrapPanel>
 
                         <Grid Margin="3">
                             <Grid.ColumnDefinitions>
@@ -41,19 +46,23 @@
                                 <RowDefinition />
                                 <RowDefinition />
                                 <RowDefinition />
+                                <RowDefinition />
                             </Grid.RowDefinitions>
 
                             <TextBlock Grid.Row="0" Grid.Column="0" Text="Адрес" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Address}" />
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Дата публикации" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding PublishingDate}" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Дата сохранения в БД (UTC)" />
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CreatedAtUtc}" />
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Цена" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Price}" />
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Дата публикации" />
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding PublishingDate}" />
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Фотографии" />
-                            <ScrollViewer Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Hidden">
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Цена" />
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Price}" />
+
+                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Фотографии" />
+                            <ScrollViewer Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Hidden">
                                 <ItemsControl ItemsSource="{Binding ImageUrls}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

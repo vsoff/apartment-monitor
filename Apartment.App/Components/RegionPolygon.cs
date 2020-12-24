@@ -12,7 +12,7 @@ namespace Apartment.App.Components
     {
         private readonly string _name;
         private const double StrokeThickness = 2;
-        private const double Opacity = 0.6;
+        private const double Opacity = 0.3;
         private readonly Brush _strokeBrush;
         private readonly Brush _fillBrush;
         

@@ -70,7 +70,10 @@ namespace Apartment.Data.Entities
         /// <summary>
         /// Дата публикации объявления.
         /// </summary>
+        // TODO: Переименовать в RaisedAtUtc.
         public DateTime PublishingDate { get; set; }
+
+        // TODO: Добавить поле FirstMentionedAtUtc. Оно будет хранить в себе время первого поднятия/добавления объявления, которое мы заметили.
 
         /// <summary>
         /// Дата исчезновения объявления.

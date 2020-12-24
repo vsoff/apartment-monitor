@@ -37,6 +37,7 @@ namespace Apartment.App.ViewModels
             DeleteSelectedRegionCommand = new RelayCommand(DeleteSelectedRegion, x => SelectedRegion != null);
             CancelSelectedRegionCommand = new RelayCommand(CancelSelectedRegion, x => SelectedRegion != null);
             mapViewModel.RegionCreated += (sender, locations) => OnRegionCreated(locations);
+            MaxApartmentPrice = 3000000;
         }
 
         private async void Initialize()
@@ -74,14 +75,23 @@ namespace Apartment.App.ViewModels
         /// </summary>
         private async Task UpdateApartmentsList()
         {
+            // Получаем актуальные объявления.
             var actualApartments = (await _apartmentsProvider.GetApartmentsAsync())
-                .DistinctBy(x => x.ExternalId).OrderBy(x => x.Price).ToArray();
-            MapViewModel.Apartments.Clear();
+                .DistinctBy(x => x.ExternalId)
+                .OrderBy(x => x.Price)
+                .Where(x => !x.Price.HasValue || x.Price <= MaxApartmentPrice)
+                .ToArray();
+
+            // Фильтруем по регионам.
             var apartmentInRegions = MapViewModel.Regions.Count == 0
                 ? actualApartments
                 : actualApartments.Where(x => MapViewModel.Regions.Any(r => r.Contains(x.Location)));
 
+            // Группируем ближайшие объявления.
             var groupedApartments = GroupNearestApartments(apartmentInRegions, MergeApartmentsClip);
+
+            // Добавляем на карту.
+            MapViewModel.Apartments.Clear();
             foreach (var apartmentGroup in groupedApartments)
                 MapViewModel.Apartments.Add(apartmentGroup);
         }
@@ -119,12 +129,13 @@ namespace Apartment.App.ViewModels
             if (SelectedRegion == null)
                 return;
 
-            var region = await _regionsService.UpdateRegionAsync(SelectedRegion);
+            var region = await _regionsService.UpdateRegionAsync(SelectedRegionViewModel.GetNewRegion());
             MapViewModel.Regions.Remove(SelectedRegion);
             MapViewModel.Regions.Add(region);
+            SelectedRegion = null;
         }
 
-        private async void CancelSelectedRegion(object _)
+        private void CancelSelectedRegion(object _)
         {
             SelectedRegion = null;
         }
@@ -139,10 +150,13 @@ namespace Apartment.App.ViewModels
 
             await _regionsService.DeleteRegionAsync(SelectedRegion.Id);
             MapViewModel.Regions.Remove(SelectedRegion);
-            //await UpdateRegionsList();
+            SelectedRegion = null;
         }
 
         #region Binding
+
+        public bool DisplayRegions { get; set; }
+        public int MaxApartmentPrice { get; set; }
 
         public MapViewModel MapViewModel { get; }
 

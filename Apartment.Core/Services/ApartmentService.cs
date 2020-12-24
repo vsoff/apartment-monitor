@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Apartment.Common;
 using Apartment.Common.Loggers;
@@ -10,6 +12,7 @@ using Apartment.Data;
 using Apartment.Data.Entities;
 using Apartment.Data.Uow;
 using DifferencesSearch;
+using GMap.NET;
 using Newtonsoft.Json;
 
 namespace Apartment.Core.Services
@@ -97,7 +100,7 @@ namespace Apartment.Core.Services
 
             if (newItems.Length > 0)
                 _logger.Trace($"{GetType().Name}: Было успешно добавлено {newItems.Length} объявлений в БД:" +
-                              $"\n* {string.Join("\n* ", newItems.Select(x => $"{x.Title} за {x.Price}руб."))}");
+                              $"\n* {string.Join("\n* ", newItems.Select(x => $"[{x.Id}] {x.Title} за {x.Price}руб."))}");
 
             // Теперь пишем историю для всех объявлений.
             var apartmentsChanges = new List<ItemChangeEntity>();
@@ -131,15 +134,72 @@ namespace Apartment.Core.Services
                 updatedApartments.Add(newApartment);
             }
 
+
             await uow.Apartments.UpdateAsync(updatedApartments);
             await uow.ItemsChanges.AddAsync(apartmentsChanges);
             await uow.SaveChangesAsync();
+
 
             _logger.Trace($"{GetType().Name}: Всего было изменено {updatedApartments.Count} апартаметов и {apartmentsChanges.Count} полей");
 
             if (apartmentsChanges.Count > 0)
                 _logger.Trace($"{GetType().Name}: Были изменены поля у некоторых объявлений:" +
                               $"\n* {string.Join("\n* ", apartmentsChanges.Select(x => $"[Id {x.ObjectId}] {x.PropertyName}: {x.OldValueJson} ==> {x.NewValueJson}"))}");
+
+            await TraceApartmentsChanges(uow, newItems, updatedApartments);
+        }
+
+        private async Task TraceApartmentsChanges(
+            UnitOfWork uow,
+            ICollection<ApartmentEntity> addedApartments,
+            ICollection<ApartmentEntity> updatedApartments)
+        {
+            var activeRegions = (await uow.Regions.GetAsync(x => !x.IsDeleted))
+                .Select(x => x.ToCore())
+                .ToArray();
+
+            var logBuilder = new StringBuilder();
+
+            bool AddTraceLogText(ICollection<ApartmentEntity> apartments, string header)
+            {
+                var apartmentsPairs = new List<KeyValuePair<Region, ApartmentEntity>>();
+                foreach (var apartment in apartments)
+                {
+                    var region = activeRegions.FirstOrDefault(x => x.Contains(new PointLatLng(apartment.Lat, apartment.Lng)));
+                    if (region == null)
+                        continue;
+
+                    apartmentsPairs.Add(new KeyValuePair<Region, ApartmentEntity>(region, apartment));
+                }
+
+                if (apartmentsPairs.Count == 0)
+                    return false;
+
+                var grouped = apartmentsPairs
+                    .GroupBy(x => x.Key)
+                    .Select(x => new {Region = x.Key, Apartments = x.Select(y => y.Value).ToArray()})
+                    .ToDictionary(x => x.Region, x => x.Apartments);
+
+                logBuilder.AppendLine(header);
+                foreach (var (region, regionApartments) in grouped)
+                {
+                    logBuilder.AppendLine($"@ Регион `{region.Name}`:");
+                    foreach (var apartment in regionApartments)
+                    {
+                        logBuilder.AppendLine($"\t* [{apartment.Id}] {apartment.Title} ({apartment.Url})");
+                    }
+                }
+
+                return true;
+            }
+
+            var hasAdded = AddTraceLogText(addedApartments, "Были ДОБАВЛЕНЫ объявления в интересующих регионах:");
+            var hasChanged = AddTraceLogText(updatedApartments, "Были ИЗМЕНЕНЫ объявления в интересующих регионах:");
+
+            if (hasAdded || hasChanged)
+                _logger.Info($"{GetType().Name}: Есть изменения в интересных регионах: {logBuilder}");
+            else
+                _logger.Info($"{GetType().Name}: Не было изменений в интересных регионах");
         }
 
         public async Task<ICollection<ApartmentInfo>> GetActuallyApartmentsAsync()
